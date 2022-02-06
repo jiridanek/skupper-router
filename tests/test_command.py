@@ -63,6 +63,7 @@ FBM = FakeBusManager
 
 class TestParseArgsQdstat(unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.parser = _qdstat_parser(BusManager=FBM)
 
     def test_parse_args_qdstat_print_help(self):
@@ -113,6 +114,7 @@ class TestParseArgsQdstat(unittest.TestCase):
 
 class TestParseArgsQdmanage(unittest.TestCase):
     def setUp(self):
+        super().setUp()
         self.operations = ["HERE", "SOME", "OPERATIONS"]
         self.parser = _qdmanage_parser(operations=self.operations)
 

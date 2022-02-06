@@ -39,6 +39,7 @@ import re
 import shutil
 import socket
 import subprocess
+import traceback
 from copy import copy
 from datetime import datetime
 from subprocess import PIPE, STDOUT
@@ -620,15 +621,19 @@ class Qdrouterd(Process):
         """If router has a connection to host:port:identity return the management info.
         Otherwise return None"""
         try:
+            print("sending management query")
             ret_val = False
             response = self.management.query(type="org.apache.qpid.dispatch.connection")
             index_host = response.attribute_names.index('host')
+            print(response.results)
             for result in response.results:
                 outs = '%s:%s' % (host, port)
                 if result[index_host] == outs:
                     ret_val = True
             return ret_val
-        except:
+        except Exception as e:
+            print(e)
+            traceback.print_exception(e)
             return False
 
     def wait_address(self, address, subscribers=0, remotes=0, containers=0,
@@ -819,12 +824,13 @@ class Tester:
 class TestCase(unittest.TestCase, Tester):  # pylint: disable=too-many-public-methods
     """A TestCase that sets up its own working directory and is also a Tester."""
 
-    def __init__(self, test_method):
-        unittest.TestCase.__init__(self, test_method)
+    def __init__(self, methodName='runTest'):
+        unittest.TestCase.__init__(self, methodName)
         Tester.__init__(self, self.id())
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.maxDiff = None
         cls.tester = Tester('.'.join([cls.__module__, cls.__name__, 'setUpClass']))
         cls.tester.rmtree()
@@ -835,12 +841,15 @@ class TestCase(unittest.TestCase, Tester):  # pylint: disable=too-many-public-me
         if hasattr(cls, 'tester'):
             cls.tester.teardown()
             del cls.tester
+        super().tearDownClass()
 
     def setUp(self):
+        super().setUp()
         Tester.setup(self)
 
     def tearDown(self):
         Tester.teardown(self)
+        super().tearDown()
 
     def assert_fair(self, seq):
         avg = sum(seq) / len(seq)
