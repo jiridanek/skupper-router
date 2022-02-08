@@ -65,26 +65,19 @@ class RouterTest(TestCase):
         edge_port_A       = cls.tester.get_port()
         edge_port_B       = cls.tester.get_port()
 
-        print("starting A")
         router('INT.A', 'interior',
                ('listener', {'role': 'inter-router', 'port': inter_router_port}),
                ('listener', {'role': 'edge', 'port': edge_port_A}))
-        print("starting B")
         router('INT.B', 'interior',
                ('connector', {'name': 'connectorToA', 'role': 'inter-router', 'port': inter_router_port}),
                ('listener',  {'role': 'edge', 'port': edge_port_B}))
-        print("starting EA1")
         router('EA1',   'edge',     ('connector', {'name': 'edge', 'role': 'edge', 'port': edge_port_A}))
         router('EA2',   'edge',     ('connector', {'name': 'edge', 'role': 'edge', 'port': edge_port_A}))
         router('EB1',   'edge',     ('connector', {'name': 'edge', 'role': 'edge', 'port': edge_port_B}))
         router('EB2',   'edge',     ('connector', {'name': 'edge', 'role': 'edge', 'port': edge_port_B}))
-        print("done starting all")
 
-        print("waiting a -- b")
         cls.routers[0].wait_router_connected('INT.B')
-        print("waiting b -- a")
         cls.routers[1].wait_router_connected('INT.A')
-        print("done waiting all")
 
     def test_01_dest_sender_same_edge(self):
         test = LRDestSenderFlowTest(self.routers[2].addresses[0],

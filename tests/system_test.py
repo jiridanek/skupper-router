@@ -39,7 +39,6 @@ import re
 import shutil
 import socket
 import subprocess
-import traceback
 from copy import copy
 from datetime import datetime
 from subprocess import PIPE, STDOUT
@@ -621,19 +620,15 @@ class Qdrouterd(Process):
         """If router has a connection to host:port:identity return the management info.
         Otherwise return None"""
         try:
-            print("sending management query")
             ret_val = False
             response = self.management.query(type="org.apache.qpid.dispatch.connection")
             index_host = response.attribute_names.index('host')
-            print(response.results)
             for result in response.results:
                 outs = '%s:%s' % (host, port)
                 if result[index_host] == outs:
                     ret_val = True
             return ret_val
-        except Exception as e:
-            print(e)
-            traceback.print_exception(e)
+        except:
             return False
 
     def wait_address(self, address, subscribers=0, remotes=0, containers=0,
