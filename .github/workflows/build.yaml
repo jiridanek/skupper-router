@@ -123,7 +123,7 @@ jobs:
             ${ProtonCMakeExtraArgs}
 
       - name: qpid-proton cmake build/install
-        run: cmake --build "${ProtonBuildDir}" --config ${BuildType} -t install
+        run: cmake --build "${ProtonBuildDir}" --config ${BuildType} -t install --parallel 6
 
       - name: Display ccache stats
         run: ccache -s
@@ -139,7 +139,7 @@ jobs:
             ${RouterCMakeExtraArgs}
 
       - name: skupper-router cmake build/install
-        run: cmake --build "${RouterBuildDir}" --config ${BuildType} -t install
+        run: cmake --build "${RouterBuildDir}" --config ${BuildType} -t install --parallel 6
 
       - name: Display ccache stats
         run: ccache -s
@@ -392,7 +392,7 @@ jobs:
             ${ProtonCMakeExtraArgs}
 
       - name: qpid-proton cmake build/install
-        run: cmake --build "${ProtonBuildDir}" --config ${BuildType} --target install
+        run: cmake --build "${ProtonBuildDir}" --config ${BuildType} --target install --parallel 6
 
       - name: Display ccache stats
         run: ccache -s
@@ -415,7 +415,7 @@ jobs:
             ${RouterCMakeExtraArgs} -DQD_ENABLE_ASSERTIONS=${RouterCMakeAsserts}
 
       - name: skupper-router cmake build/install
-        run: cmake --build "${RouterBuildDir}" --config ${BuildType} --target install
+        run: cmake --build "${RouterBuildDir}" --config ${BuildType} --target install --parallel 6
 
       - name: Display ccache stats
         run: ccache -s
@@ -561,7 +561,7 @@ jobs:
             ${RouterCMakeExtraArgs}
 
       - name: CMake build for docs
-        run: cmake --build "${RouterBuildDir}" -t docs
+        run: cmake --build "${RouterBuildDir}" -t docs --parallel 6
 
       - name: Store the rendered user-guide
         uses: actions/upload-artifact@v2
