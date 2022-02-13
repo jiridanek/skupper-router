@@ -40,6 +40,10 @@ jobs:
   allow_failures:
     - arch: arm64
     - arch: ppc64le
+    - arch: s390x
+  include:
+    - arch: arm64
+      env: PROTON_VERSION=main BUILD_TYPE=RelWithDebInfo RUNTIME_CHECK=hwasan QD_ENABLE_ASSERTIONS=ON
   exclude:
     - arch: s390x
       env: RUNTIME_CHECK=tsan QD_ENABLE_ASSERTIONS=OFF
