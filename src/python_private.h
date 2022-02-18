@@ -24,16 +24,8 @@
 
 #include <stdint.h>
 
-#if PY_MAJOR_VERSION <= 2
-// deal with the two integer types in Python2
-#define QD_PY_INT_CHECK(PO) (PyInt_Check(PO) || PyLong_Check(PO))
-#define QD_PY_INT_2_INT64(PO) (PyLong_Check(PO) ? \
-                               (int64_t) PyLong_AsLongLong(PO) : \
-                               (int64_t) PyInt_AS_LONG(PO))
-#else  // Python3
 #define QD_PY_INT_CHECK(PO) (PyLong_Check(PO))
 #define QD_PY_INT_2_INT64(PO) ((int64_t)PyLong_AsLongLong(PO))
-#endif
 
 // Convert a Python string type to a C string.  The resulting string may be
 // UTF-8 encoded.  Caller must free returned string buffer.  Returns NULL on

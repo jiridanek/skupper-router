@@ -192,21 +192,17 @@ qd_error_t qd_py_to_composed(PyObject *value, qd_composed_field_t *field)
         }
     }
     else if (PyBytes_Check(value)) {
-        // Note: In python 2.X PyBytes is simply an alias for the PyString
+        // Note: In python 2.X PyBytes was simply an alias for the PyString
         // type. In python 3.x PyBytes is a distinct type (may contain zeros),
         // and all strings are PyUnicode types.  Historically
         // this code has just assumed this data is always a null terminated
         // UTF8 string. We continue that tradition for Python2, but ending up
         // here in Python3 means this is actually binary data which may have
         // embedded zeros.
-        if (PY_MAJOR_VERSION <= 2) {
-            qd_compose_insert_string(field, PyBytes_AsString(value));
-        } else {
-            ssize_t len = 0;
-            char *data = NULL;
-            PyBytes_AsStringAndSize(value, &data, &len);
-            qd_compose_insert_binary(field, (uint8_t *)data, len);
-        }
+        ssize_t len = 0;
+        char *data = NULL;
+        PyBytes_AsStringAndSize(value, &data, &len);
+        qd_compose_insert_binary(field, (uint8_t *)data, len);
     }
     else if (PyDict_Check(value)) {
         Py_ssize_t  iter = 0;
@@ -307,7 +303,7 @@ qd_error_t qd_py_to_pn_data(PyObject *value, pn_data_t *data)
         }
     }
     else if (PyBytes_Check(value)) {
-        // Note: In python 2.X PyBytes is simply an alias for the PyString
+        // Note: In python 2.X PyBytes was simply an alias for the PyString
         // type. In python 3.x PyBytes is a distinct type (may contain zeros),
         // and all strings are PyUnicode types.  Historically
         // this code has just assumed this data is always a null terminated
@@ -320,11 +316,7 @@ qd_error_t qd_py_to_pn_data(PyObject *value, pn_data_t *data)
         PyBytes_AsStringAndSize(value, &str, &p_size); QD_ERROR_PY_RET();
         pb.start = str;
         pb.size = p_size;
-        if (PY_MAJOR_VERSION <= 2) {
-            pn_data_put_string(data, pb);
-        } else {
-            pn_data_put_binary(data, pb);
-        }
+        pn_data_put_binary(data, pb);
     }
     else if (PyDict_Check(value)) {
         Py_ssize_t  iter = 0;
