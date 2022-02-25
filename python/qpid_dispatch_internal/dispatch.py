@@ -133,13 +133,13 @@ class QdDll(ctypes.PyDLL):
 FORBIDDEN = ["proton"]
 
 
-def check_forbidden():
+def check_forbidden() -> None:
     bad = set(FORBIDDEN) & set(sys.modules)
     if bad:
         raise ImportError("Forbidden modules loaded: '%s'." % "', '".join(bad))
 
 
-def import_check(name, *args, **kw):
+def import_check(name: str, *args, **kw):
     if name in FORBIDDEN:
         raise ImportError("Python code running inside a dispatch router cannot import '%s', use the 'dispatch' module for internal messaging" % name)
     return builtin_import(name, *args, **kw)

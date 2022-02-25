@@ -22,6 +22,7 @@ Qpid Dispatch Router management schema and config file parsing.
 """
 import json
 from pkgutil import get_data
+from typing import Any, Dict, List
 
 from qpid_dispatch_internal.compat import JSON_LOAD_KWARGS
 from . import schema
@@ -35,7 +36,7 @@ class QdSchema(schema.Schema):
     CONFIGURATION_ENTITY = "configurationEntity"
     OPERATIONAL_ENTITY = "operationalEntity"
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Load schema."""
         qd_schema = get_data('qpid_dispatch.management', 'qdrouter.json').decode('utf8')
         try:
@@ -45,7 +46,11 @@ class QdSchema(schema.Schema):
         self.configuration_entity = self.entity_type(self.CONFIGURATION_ENTITY)
         self.operational_entity = self.entity_type(self.OPERATIONAL_ENTITY)
 
-    def validate_add(self, attributes, entities):
+    def validate_add(
+            self,
+            attributes: Dict[str, str],
+            entities: List[Any]
+    ) -> None:
         """
         Check that listeners and connectors can only have role=inter-router if the router has
         mode=interior.
@@ -83,8 +88,8 @@ class QdSchema(schema.Schema):
                     raise schema.ValidationError(
                         "role='edge' only allowed with router mode='interior' for %s" % list_conn_entity)
 
-    def is_configuration(self, entity_type):
+    def is_configuration(self, entity_type: schema.EntityType) -> bool:
         return entity_type and self.configuration_entity in entity_type.all_bases
 
-    def is_operational(self, entity_type):
+    def is_operational(self, entity_type: schema.EntityType) -> bool:
         return entity_type and self.operational_entity in entity_type.all_bases

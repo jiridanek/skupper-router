@@ -20,6 +20,8 @@
 """
 ManagementError exception class and subclasses, with status codes used by AMQP.
 """
+from proton._data import int32
+from typing import Union
 
 #from httplib import responses as STATUS_TEXT
 # from httplib import OK, NO_CONTENT, CREATED, \
@@ -93,12 +95,12 @@ class ManagementError(Exception):
     @ivar description: detailed description of error.
     """
 
-    def __init__(self, status, description):
+    def __init__(self, status: int, description: str) -> None:
         self.status, self.description = status, description
         super(ManagementError, self).__init__(description)
 
     @staticmethod
-    def create(status, description):
+    def create(status: int32, description: str) -> 'ManagementError':
         """Create the appropriate ManagementError subclass for status"""
         try:
             class_name = STATUS_TEXT[status].replace(' ', '') + "Status"

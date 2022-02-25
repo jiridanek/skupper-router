@@ -27,11 +27,12 @@ __all__ = [
 ]
 
 from collections import OrderedDict
+from typing import Any, Dict, Union
 
 JSON_LOAD_KWARGS = {'object_pairs_hook': OrderedDict}
 
 
-def dictify(od):
+def dictify(od: Union[OrderedDict, Any]) -> Dict[Any, Any]:
     """Recursively replace OrderedDict with dict"""
     if isinstance(od, OrderedDict):
         return dict((k, dictify(v)) for k, v in od.items())
@@ -39,7 +40,7 @@ def dictify(od):
         return od
 
 
-def BINARY(s):
+def BINARY(s: Union[str, bytes]) -> bytes:
     st = type(s)
     if st is str:
         return s.encode("utf-8")
@@ -49,7 +50,7 @@ def BINARY(s):
         raise TypeError("%s cannot be converted to binary" % st)
 
 
-def UNICODE(s):
+def UNICODE(s: Union[str, bytes]) -> str:
     if isinstance(s, bytes):
         return s.decode("utf-8")
     elif isinstance(s, str):

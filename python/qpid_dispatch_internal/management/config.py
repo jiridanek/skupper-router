@@ -28,6 +28,11 @@ from qpid_dispatch.management.entity import camelcase
 
 from ..dispatch import QdDll
 from .qdrouter import QdSchema
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import io
+    from .schema import EntityType
 
 try:
     from ..dispatch import LogAdapter, LOG_WARNING, LOG_ERROR
@@ -40,7 +45,12 @@ except ImportError:
 class Config:
     """Load config entities from qdrouterd.conf and validated against L{QdSchema}."""
 
-    def __init__(self, filename=None, schema=QdSchema(), raw_json=False):
+    def __init__(
+            self,
+            filename: Optional[str] = None,
+            schema: QdSchema = QdSchema(),
+            raw_json: bool = False
+    ) -> None:
         self.schema = schema
         self.config_types = [et for et in schema.entity_types.values()
                              if schema.is_configuration(et)]
@@ -61,7 +71,7 @@ class Config:
             self._log_adapter.log(level, text, info[0], info[1])
 
     @staticmethod
-    def transform_sections(sections):
+    def transform_sections(sections: List[List[Union[str, Dict[str, str]]]]) -> None:
         for s in sections:
             s[0] = camelcase(s[0])
             s[1] = dict((camelcase(k), v) for k, v in s[1].items())
@@ -74,7 +84,7 @@ class Config:
             if s[0] == "binding":
                 s[0] = "router.config.binding"
 
-    def _parse(self, lines):
+    def _parse(self, lines: List[str]) -> List[Any]:
         """
         Parse config file format into a section list
 
@@ -215,10 +225,14 @@ class Config:
         Config.transform_sections(sections)
         return sections
 
-    def get_config_types(self):
+    def get_config_types(self) -> List[EntityType]:
         return self.config_types
 
-    def load(self, source, raw_json=False):
+    def load(
+            self,
+            source: Union[str, io.TextIOWrapper, List[str]],
+            raw_json: bool = False
+    ) -> None:
         """
         Load a configuration file.
         @param source: A file name, open file object or iterable list of lines
@@ -238,7 +252,7 @@ class Config:
             self.schema.validate_all(entities)
             self.entities = entities
 
-    def by_type(self, entity_type):
+    def by_type(self, entity_type: str) -> List[Dict[str, Any]]:
         """Return entities of given type"""
         entity_type = self.schema.long_name(entity_type)
         return [e for e in self.entities if e['type'] == entity_type]
