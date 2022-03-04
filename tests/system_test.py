@@ -503,7 +503,8 @@ class Qdrouterd(Process):
     @property
     def management(self):
         """Return a management agent proxy for this router"""
-        logging.error(f"XXXX {self._management.connection.disconnected}, {self._management.connection._is_closed()}")
+        if self._management:
+            logging.error(f"XXXX {self._management.connection.disconnected}, {self._management.connection._is_closed()}")
         need_new_management = False
         if self._management and self._management.connection.disconnected:
             need_new_management = True
