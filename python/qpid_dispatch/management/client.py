@@ -159,8 +159,8 @@ class Node:
         """
         try:
             code = response.properties.get('statusCode')
-        except ValueError:
-            logging.error(f"Got ValueError: {repr(response)}")
+        except AttributeError:
+            logging.error(f"Got AttributeError: {repr(response)}")
             raise
         if code != expect:
             if 200 <= code <= 299:
