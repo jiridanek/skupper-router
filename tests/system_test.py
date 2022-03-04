@@ -495,7 +495,7 @@ class Qdrouterd(Process):
 
         args = os.environ.get('QPID_DISPATCH_RUNNER', '').split() + args
         super(Qdrouterd, self).__init__(args, name=name, expect=expect)
-        self._management = None
+        self._management: Optional[Node] = None
         self._wait_ready = False
         if wait:
             self.wait_ready()
