@@ -121,7 +121,12 @@ class Node:
             connection.close()
             raise
 
-    def __init__(self, connection, path, locales=None):
+    def __init__(
+            self,
+            connection: BlockingConnection,
+            path: str,
+            locales=None
+    ) -> None:
         """
         Create a management node proxy using the given connection.
         @param locales: Default list of locales for management operations.
