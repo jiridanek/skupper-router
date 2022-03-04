@@ -18,6 +18,7 @@
 #
 
 """AMQP management client for Qpid dispatch."""
+import logging
 
 import proton
 from proton import Url
@@ -156,7 +157,11 @@ class Node:
         """
         Check a management response message for errors and correlation ID.
         """
-        code = response.properties.get('statusCode')
+        try:
+            code = response.properties.get('statusCode')
+        except ValueError:
+            logging.error(f"Got ValueError: {repr(response)}")
+            raise
         if code != expect:
             if 200 <= code <= 299:
                 raise ValueError("Response was %s(%s) but expected %s(%s): %s" % (
