@@ -16,7 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
+import traceback
 import unittest
 import sys
 import time
@@ -333,7 +333,7 @@ class OversizeMessageTransferTest(MessagingHandler):
         try:
             Container(self).run()
         except Exception as e:
-            self.error = "Container run exception: %s" % (e)
+            self.error = "Container run exception: %s" % traceback.format_exception(type(e), e, e.__traceback__)
             self.logger.log(self.error)
             self.logger.dump()
         time.sleep(0.2)
@@ -629,7 +629,7 @@ class OversizeMulticastTransferTest(MessagingHandler):
         try:
             Container(self).run()
         except Exception as e:
-            self.error = "Container run exception: %s" % (e)
+            self.error = "Container run exception: %s" % traceback.format_exception(type(e), e, e.__traceback__)
             self.logger.log(self.error)
             self.logger.dump()
         time.sleep(0.2)
