@@ -184,7 +184,7 @@ jobs:
       InstallPrefix: ${{github.workspace}}/install
       RouterCTestExtraArgs: ""
       LD_LIBRARY_PATH: ${{github.workspace}}/install/lib
-      QPID_SYSTEM_TEST_TIMEOUT: 300
+      QPID_SYSTEM_TEST_TIMEOUT: 600
 
     steps:
 
@@ -324,7 +324,7 @@ jobs:
       CCACHE_DIR: ${{github.workspace}}/.ccache
       CCACHE_COMPRESS: 'true'
       CCACHE_MAXSIZE: '400MB'
-      QPID_SYSTEM_TEST_TIMEOUT: 300
+      QPID_SYSTEM_TEST_TIMEOUT: 600
       VERBOSE: 1
 
     steps:
