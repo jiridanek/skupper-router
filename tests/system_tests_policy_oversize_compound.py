@@ -559,7 +559,8 @@ class OversizeMulticastTransferTest(MessagingHandler):
                     # Blocked by interior and edge. Expect edge connection to go down
                     # and some of our messaages arrive at edge after it has sent
                     # AMQP close. Those messages are never settled. TODO: Is that OK?
-                    done = self.n_rejected == 1 and \
+                    # TODO: test_60 can have one or two rejects, see e.g. https://github.com/jiridanek/skupper-router/runs/5431923575?check_suite_focus=true#step:9:7490
+                    done = self.n_rejected in (1, 2) and \
                         self.n_connection_error == 1
                 else:
                     # Blocked by interior only. Connection to edge stays up
