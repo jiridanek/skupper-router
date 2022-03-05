@@ -510,10 +510,10 @@ class Qdrouterd(Process):
         need_new_management = False
         if self._management and self._management.connection.disconnected:
             need_new_management = True
-            logging.error(f"XXXX will create new")
+            logging.error("XXXX will create new")
         if self._management and self._management.connection._is_closed():
             need_new_management = True
-            logging.error(f"XXXX will create new")
+            logging.error("XXXX will create new")
         if not self._management or need_new_management:
             self._management = Node.connect(self.addresses[0], timeout=TIMEOUT)
         return self._management
