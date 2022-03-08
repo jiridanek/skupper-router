@@ -106,7 +106,7 @@ class Common:
         '''
         Sense if the key is a log module name in the log line.
         The name can't be too far into the string or else it finds
-        false positives when a user uses qdstat to get a log file.
+        false positives when a user uses skstat to get a log file.
         MAX_POSITION defines what constitutes 'too far'.
         :param key:
         :param line:

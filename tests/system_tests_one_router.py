@@ -27,7 +27,7 @@ from proton.handlers import MessagingHandler
 from proton.utils import BlockingConnection, SyncRequestResponse
 from proton.reactor import Container, AtMostOnce, AtLeastOnce
 
-from qpid_dispatch.management.client import Node
+from skupper_router.management.client import Node
 
 from system_test import TestCase, Qdrouterd, main_module, TIMEOUT, DIR, Process, unittest, QdManager, TestTimeout
 
@@ -340,9 +340,9 @@ class OneRouterTest(TestCase):
         cls.out_strip_addr  = cls.router.addresses[3]
         cls.in_strip_addr   = cls.router.addresses[4]
 
-    def run_qdmanage(self, cmd, input=None, expect=Process.EXIT_OK, address=None):
+    def run_skmanage(self, cmd, input=None, expect=Process.EXIT_OK, address=None):
         p = self.popen(
-            ['qdmanage'] + cmd.split(' ') + ['--bus', address or self.address, '--indent=-1', '--timeout', str(TIMEOUT)],
+            ['skmanage'] + cmd.split(' ') + ['--bus', address or self.address, '--indent=-1', '--timeout', str(TIMEOUT)],
             stdin=PIPE, stdout=PIPE, stderr=STDOUT, expect=expect,
             universal_newlines=True)
         out = p.communicate(input)[0]
@@ -424,7 +424,7 @@ class OneRouterTest(TestCase):
         self.assertIsNone(test.error)
 
     # Tests stripping of ingress and egress annotations.
-    # There is a property in qdrouter.json called stripAnnotations with possible values of ["in", "out", "both", "no"]
+    # There is a property in skrouter.json called stripAnnotations with possible values of ["in", "out", "both", "no"]
     # The default for stripAnnotations is "both" (which means strip annotations on both ingress and egress)
     # This test will test the stripAnnotations = no option - meaning no annotations must be stripped.
     # We will send in a custom annotation and make sure that we get back 3 annotations on the received message
@@ -664,7 +664,7 @@ class OneRouterTest(TestCase):
         connection = BlockingConnection(self.address,
                                         properties=CONNECTION_PROPERTIES_UNICODE_STRING)
         query_command = 'QUERY --type=connection'
-        outputs = json.loads(self.run_qdmanage(query_command))
+        outputs = json.loads(self.run_skmanage(query_command))
         identity = None
         passed = False
 
@@ -672,14 +672,14 @@ class OneRouterTest(TestCase):
             if output.get('properties'):
                 conn_properties = output['properties']
                 # Find the connection that has our properties - CONNECTION_PROPERTIES_UNICODE_STRING
-                # Delete that connection and run another qdmanage to see
+                # Delete that connection and run another skmanage to see
                 # if the connection is gone.
                 if conn_properties.get('int_property'):
                     identity = output.get("identity")
                     if identity:
                         update_command = 'UPDATE --type=connection adminStatus=deleted --id=' + identity
                         try:
-                            outputs = json.loads(self.run_qdmanage(update_command))
+                            outputs = json.loads(self.run_skmanage(update_command))
                         except Exception as e:
                             if "Forbidden" in str(e):
                                 passed = True

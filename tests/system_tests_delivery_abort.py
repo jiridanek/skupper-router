@@ -21,7 +21,7 @@ from proton import Message
 from proton.handlers import MessagingHandler
 from proton.reactor import Container
 
-from qpid_dispatch_internal.compat import BINARY
+from skupper_router_internal.compat import BINARY
 
 from system_test import Logger, TestCase, Qdrouterd, main_module, unittest, TIMEOUT, TestTimeout
 

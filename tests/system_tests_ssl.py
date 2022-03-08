@@ -33,7 +33,7 @@ import proton
 from proton import SASL, Url, SSLDomain, SSLUnavailable
 from proton.utils import BlockingConnection
 
-from qpid_dispatch.management.client import Node
+from skupper_router.management.client import Node
 from system_test import TestCase, main_module, Qdrouterd, DIR
 from system_test import unittest
 

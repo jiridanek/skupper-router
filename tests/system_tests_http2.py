@@ -237,7 +237,7 @@ class CommonHttp2Tests:
         http_listeners = qd_manager.query('org.apache.qpid.dispatch.httpListener')
         self.assertEqual(len(http_listeners), 1)
 
-        # Run a qdmanage DELETE on the httpListener
+        # Run a skmanage DELETE on the httpListener
         qd_manager.delete("org.apache.qpid.dispatch.httpListener", name=self.listener_name)
 
         # Make sure the listener is gone
@@ -264,7 +264,7 @@ class CommonHttp2Tests:
         # We are first making sure that the http request goes thru successfully.
         out = self.run_curl(client_addr)
 
-        # Run a qdmanage query on connections to see how many qdr_connections are
+        # Run a skmanage query on connections to see how many qdr_connections are
         # there on the egress router
         qd_manager = QdManager(address=server_addr)
         connections = qd_manager.query('org.apache.qpid.dispatch.connection')
@@ -277,7 +277,7 @@ class CommonHttp2Tests:
                 break
         self.assertTrue(server_conn_found)
 
-        # Run a qdmanage DELETE on the httpConnector
+        # Run a skmanage DELETE on the httpConnector
         http_connectors  = qd_manager.query('org.apache.qpid.dispatch.httpConnector')
         self.assertEqual(len(http_connectors), 1)
 
@@ -310,7 +310,7 @@ class CommonHttp2Tests:
         self.assertTrue(request_timed_out)
 
         # Add back the httpConnector
-        # qdmanage CREATE type=httpConnector address=examples.com host=127.0.0.1 port=80 protocolVersion=HTTP2
+        # skmanage CREATE type=httpConnector address=examples.com host=127.0.0.1 port=80 protocolVersion=HTTP2
         create_result = qd_manager.create("org.apache.qpid.dispatch.httpConnector", self.connector_props)
         num_tries = 2
         tries = 0

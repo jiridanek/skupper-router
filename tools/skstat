@@ -23,17 +23,17 @@ import sys
 from datetime import datetime
 from time import ctime, strftime, gmtime
 
-import qpid_dispatch_site
-qpid_dispatch_site.populate_pythonpath()
+import skupper_router_site
+skupper_router_site.populate_pythonpath()
 
-from qpid_dispatch.management.client import Node
-from qpid_dispatch_internal.management.qdrouter import QdSchema
-from qpid_dispatch_internal.tools import Display, Header, Sorter, TimeLong, TimeShort, BodyFormat, PlainNum
-from qpid_dispatch_internal.tools import NumKMG
-from qpid_dispatch_internal.tools.command import (parse_args_qdstat, main,
-                                                  opts_ssl_domain, opts_sasl,
-                                                  opts_url)
-from qpid_dispatch_internal.compat import UNICODE
+from skupper_router.management.client import Node
+from skupper_router_internal.management.qdrouter import QdSchema
+from skupper_router_internal.tools import Display, Header, Sorter, TimeLong, TimeShort, BodyFormat, PlainNum
+from skupper_router_internal.tools import NumKMG
+from skupper_router_internal.tools.command import (parse_args_skstat, main,
+                                                   opts_ssl_domain, opts_sasl,
+                                                   opts_url)
+from skupper_router_internal.compat import UNICODE
 
 
 def get(obj, attr):
@@ -217,7 +217,7 @@ class BusManager:
             except:
                 pass
 
-        # This is so that, this qdstat can be used against older routers without Python keyerrors
+        # This is so that, this skstat can be used against older routers without Python keyerrors
         if has_last_dlv:
             heads.append(Header("last dlv"))
         if has_uptime:
@@ -342,7 +342,7 @@ class BusManager:
 
         # Overall delivery related counts.
         # These overall statistics were introduced in 1.1 version.
-        # Wrap these in a try except so that newer versions of qdstat works with older version of router
+        # Wrap these in a try except so that newer versions of skstat works with older version of router
         try:
             rows.append(('Presettled Count', PlainNum(router.presettledDeliveries)))
             rows.append(('Dropped Presettled Count', PlainNum(router.droppedPresettledDeliveries)))
@@ -1003,7 +1003,7 @@ class BusManager:
 
 
 def run(argv):
-    args = parse_args_qdstat(BusManager)
+    args = parse_args_skstat(BusManager)
     bm = BusManager(args)
     try:
         bm.display()

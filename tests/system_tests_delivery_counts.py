@@ -21,7 +21,7 @@ from proton import Message, Delivery
 from proton.handlers import MessagingHandler
 from proton.reactor import Container
 
-from qpid_dispatch.management.client import Node
+from skupper_router.management.client import Node
 
 from system_test import TestCase, Qdrouterd, TIMEOUT, get_link_info, \
     get_inter_router_links, has_mobile_dest_in_address_table, PollTimeout, TestTimeout

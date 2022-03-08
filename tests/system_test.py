@@ -18,13 +18,13 @@
 #
 
 """System test library, provides tools for tests that start multiple processes,
-with special support for qdrouter processes.
+with special support for skupper-router processes.
 
 Features:
 - Create separate directories for each test.
 - Save logs, sub-process output, core files etc.
 - Automated clean-up after tests: kill sub-processes etc.
-- Tools to manipulate qdrouter configuration files.
+- Tools to manipulate router configuration files.
 - Sundry other tools.
 """
 
@@ -64,8 +64,8 @@ from proton import Delivery
 from proton.handlers import MessagingHandler
 from proton.reactor import AtLeastOnce, Container
 from proton.reactor import AtMostOnce
-from qpid_dispatch.management.client import Node
-from qpid_dispatch.management.error import NotFoundStatus
+from skupper_router.management.client import Node
+from skupper_router.management.error import NotFoundStatus
 
 # Optional modules
 MISSING_MODULES = []
@@ -107,7 +107,7 @@ DIR = os.path.dirname(__file__)
 def _check_requirements():
     """If requirements are missing, return a message, else return empty string."""
     missing = MISSING_MODULES
-    required_exes = ['qdrouterd']
+    required_exes = ['skrouterd']
     missing += ["No exectuable %s" % e for e in required_exes if not find_exe(e)]
 
     if missing:
@@ -488,7 +488,7 @@ class Qdrouterd(Process):
                          'includeSource': 'true', 'outputFile': self.logfile}))
         else:
             self.logfile = default_log[0][1].get('outputfile')
-        args = ['qdrouterd', '-c', config.write(name)] + cl_args
+        args = ['skrouterd', '-c', config.write(name)] + cl_args
         env_home = os.environ.get('QPID_DISPATCH_HOME')
         if pyinclude:
             args += ['-I', pyinclude]
@@ -1221,7 +1221,7 @@ class AsyncTestSender(MessagingHandler):
 
 class QdManager:
     """
-    A means to invoke qdmanage during a testcase
+    A means to invoke skmanage during a testcase
     """
 
     def __init__(self, address: Optional[str] = None,
@@ -1246,7 +1246,7 @@ class QdManager:
                  timeout: Optional[float] = None) -> str:
         addr = address or self._address
         assert addr, "address missing"
-        with subprocess.Popen(['qdmanage'] + cmd.split(' ') + self.router
+        with subprocess.Popen(['skmanage'] + cmd.split(' ') + self.router
                               + ['--bus', addr, '--indent=-1', '--timeout',
                                  str(timeout or self._timeout)], stdin=PIPE,
                               stdout=PIPE, stderr=STDOUT,

@@ -20,7 +20,7 @@
 import os
 from system_test import TestCase, Qdrouterd, DIR, main_module
 from system_test import unittest
-from qpid_dispatch.management.client import Node
+from skupper_router.management.client import Node
 from proton import SSLDomain
 
 

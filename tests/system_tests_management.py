@@ -28,11 +28,11 @@ from proton import Message
 from proton.handlers import MessagingHandler
 from proton.reactor import Container
 
-from qpid_dispatch.management.client import Node, Url
-from qpid_dispatch.management.error import ManagementError, BadRequestStatus, NotImplementedStatus, NotFoundStatus
-from qpid_dispatch_internal.management.qdrouter import QdSchema
-from qpid_dispatch_internal.compat import dictify
-from qpid_dispatch_internal.compat import BINARY
+from skupper_router.management.client import Node, Url
+from skupper_router.management.error import ManagementError, BadRequestStatus, NotImplementedStatus, NotFoundStatus
+from skupper_router_internal.management.qdrouter import QdSchema
+from skupper_router_internal.compat import dictify
+from skupper_router_internal.compat import BINARY
 
 import system_test
 from system_test import Qdrouterd, Process

@@ -172,7 +172,7 @@ class LogModuleProtocolTest(TestCase):
         # num_attaches for address TEST_ADDR must be 4, two attaches to/from sender and receiver
         self.assertTrue(num_attaches == 4)
 
-        # Turn off trace logging using qdmanage
+        # Turn off trace logging using skmanage
         qd_manager.update("org.apache.qpid.dispatch.log", {"enable": "info+"}, name="log/DEFAULT")
 
         # Turn on trace (not trace+) level logging for the PROTOCOL module. After doing
@@ -469,7 +469,7 @@ class LogLevelUpdateTest(TestCase):
         # num_attaches for address TEST_ADDR must be 4, two attaches to/from sender and receiver
         self.assertTrue(num_attaches == 4)
 
-        # STEP 2: Turn off trace logging using qdmanage
+        # STEP 2: Turn off trace logging using skmanage
         qd_manager.update("org.apache.qpid.dispatch.log", {"enable": "info+"}, name="log/DEFAULT")
 
         # Step 3: Now, router trace logging is turned off (has been set to info+)

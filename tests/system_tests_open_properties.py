@@ -197,7 +197,7 @@ class OpenPropertiesConfigTest(TestCase):
 
 class OpenPropertiesQdManageTest(TestCase):
     """
-    Tests creating openProperties via qdmanage tool
+    Tests creating openProperties via skmanage tool
     """
 
     def _valid_properties_check(self, client_class):

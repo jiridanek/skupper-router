@@ -218,7 +218,7 @@ class AutoLinkRetryTest(TestCase):
     def check_auto_link(self):
         long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
         query_command = 'QUERY --type=' + long_type
-        output = json.loads(self.run_qdmanage(query_command))
+        output = json.loads(self.run_skmanage(query_command))
 
         if output[0].get('operStatus') == "active":
             self.success = True
@@ -227,9 +227,9 @@ class AutoLinkRetryTest(TestCase):
 
         self.attempts += 1
 
-    def run_qdmanage(self, cmd, input=None, expect=Process.EXIT_OK, address=None):
+    def run_skmanage(self, cmd, input=None, expect=Process.EXIT_OK, address=None):
         p = self.popen(
-            ['qdmanage'] + cmd.split(' ') + ['--bus', address or self.address(), '--indent=-1', '--timeout', str(TIMEOUT)],
+            ['skmanage'] + cmd.split(' ') + ['--bus', address or self.address(), '--indent=-1', '--timeout', str(TIMEOUT)],
             stdin=PIPE, stdout=PIPE, stderr=STDOUT, expect=expect,
             universal_newlines=True)
         out = p.communicate(input)[0]
@@ -256,7 +256,7 @@ class AutoLinkRetryTest(TestCase):
     def test_auto_link_reattch(self):
         long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
         query_command = 'QUERY --type=' + long_type
-        output = json.loads(self.run_qdmanage(query_command))
+        output = json.loads(self.run_skmanage(query_command))
 
         # Since the distribution of the autoLinked address 'examples'
         # is set to unavailable, the link route will initially be in the
@@ -269,7 +269,7 @@ class AutoLinkRetryTest(TestCase):
         # re-attempt to establish the autoLink and once the  autoLink
         # is up, it should return to the 'active' state.
         delete_command = 'DELETE --type=address --name=unavailable-address'
-        self.run_qdmanage(delete_command, address=self.routers[0].addresses[0])
+        self.run_skmanage(delete_command, address=self.routers[0].addresses[0])
 
         self.schedule_auto_link_reconnect_test()
 
@@ -343,9 +343,9 @@ class AutolinkTest(TestCase):
         assert p.returncode == 0, "qdstat exit status %s, output:\n%s" % (p.returncode, out)
         return out
 
-    def run_qdmanage(self, cmd, input=None, expect=Process.EXIT_OK):
+    def run_skmanage(self, cmd, input=None, expect=Process.EXIT_OK):
         p = self.popen(
-            ['qdmanage'] + cmd.split(' ') + ['--bus', AutolinkTest.normal_address, '--indent=-1', '--timeout', str(TIMEOUT)],
+            ['skmanage'] + cmd.split(' ') + ['--bus', AutolinkTest.normal_address, '--indent=-1', '--timeout', str(TIMEOUT)],
             stdin=PIPE, stdout=PIPE, stderr=STDOUT, expect=expect,
             universal_newlines=True)
         out = p.communicate(input)[0]
@@ -375,7 +375,7 @@ class AutolinkTest(TestCase):
 
         long_type = 'org.apache.qpid.dispatch.router'
         query_command = 'QUERY --type=' + long_type
-        output = json.loads(self.run_qdmanage(query_command))
+        output = json.loads(self.run_skmanage(query_command))
         self.assertEqual(output[0]['deliveriesEgressRouteContainer'], 275)
         self.assertEqual(output[0]['deliveriesIngressRouteContainer'], 0)
         self.assertEqual(output[0]['deliveriesTransit'], 0)

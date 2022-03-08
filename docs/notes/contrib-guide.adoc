@@ -59,29 +59,29 @@ Before making a documentation contribution, you must set up your environment. Th
 
 . If necessary, install `git`. For more information, see link:https://git-scm.com/book/en/v2/Getting-Started-Installing-Git[Installing Git].
 
-. link:https://help.github.com/articles/connecting-to-github-with-ssh/[Set up authentication] to the qpid-dispatch GitHub repository.
+. link:https://help.github.com/articles/connecting-to-github-with-ssh/[Set up authentication] to the skupper-router GitHub repository.
 
-. Fork the link:https://github.com/apache/qpid-dispatch[qpid-dispatch] GitHub repository.
+. Fork the link:https://github.com/skupperproject/skupper-router[skupper-router] GitHub repository.
 
 . Clone your fork onto your local machine.
 +
 [source,bash,options="nowrap",subs="+quotes"]
 ----
-$ git clone git@github.com:__<your-user-name>__/qpid-dispatch.git
+$ git clone git@github.com:__<your-user-name>__/skupper-router.git
 ----
 
 . Navigate to the new directory.
 +
 [source,bash,options="nowrap",subs="+quotes"]
 ----
-$ cd qpid-dispatch
+$ cd skupper-router
 ----
 
 . Add a git remote to your local repository to link to the upstream version of the documentation.
 +
 [source,bash,options="nowrap",subs="+quotes"]
 ----
-$ git remote add upstream git@github.com:apache/qpid-dispatch.git
+$ git remote add upstream git@github.com:skupperproject/skupper-router.git
 ----
 
 . Verify that the remotes are set up properly.
@@ -89,10 +89,10 @@ $ git remote add upstream git@github.com:apache/qpid-dispatch.git
 [source,bash,options="nowrap",subs="+quotes"]
 ----
 $ git remote -v
-origin	git@github.com:__<your-user-name>__/qpid-dispatch.git (fetch)
-origin	git@github.com:__<your-user-name>__/qpid-dispatch.git (push)
-upstream	git@github.com:apache/qpid-dispatch.git (fetch)
-upstream	git@github.com:apache/qpid-dispatch.git (push)
+origin	git@github.com:__<your-user-name>__/skupper-router.git (fetch)
+origin	git@github.com:__<your-user-name>__/skupper-router.git (push)
+upstream	git@github.com:skupperproject/skupper-router.git (fetch)
+upstream	git@github.com:skupperproject/skupper-router.git (push)
 ----
 
 === Updating the documentation
@@ -191,7 +191,7 @@ $ git push origin HEAD
 
 . In GitHub, create a pull request.
 
-.. In the link:https://github.com/apache/qpid-dispatch[qpid-dispatch] GitHub project, click *Pull requests*.
+.. In the link:https://github.com/skupperproject/skupper-router[skupper-router] GitHub project, click *Pull requests*.
 
 .. Click [btn]*New pull request*.
 

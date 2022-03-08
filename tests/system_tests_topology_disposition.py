@@ -27,7 +27,7 @@ import proton
 from proton import Message
 from proton.handlers import MessagingHandler
 from proton.reactor import Container
-from qpid_dispatch_internal.compat import UNICODE
+from skupper_router_internal.compat import UNICODE
 
 from system_test import TestCase, Qdrouterd, main_module
 

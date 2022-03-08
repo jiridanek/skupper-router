@@ -576,7 +576,7 @@ class RouterFluxTest(TestCase):
         config = [
             ('router', {'id': name,
                         'mode': 'interior',
-                        # these are the default values from qdrouter.json
+                        # these are the default values from skrouter.json
                         'raIntervalSeconds': ra_interval or 30,
                         'raIntervalFluxSeconds': ra_flux or 4,
                         'remoteLsMaxAgeSeconds': ra_stale or 60}),
