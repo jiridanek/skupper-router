@@ -41,22 +41,20 @@ jobs:
           ref: ${{ matrix.skupperGitRef }}
           path: 'skupper'
 
-
+      - name: compile skupper
+        run:
+          make all
+        working-directory: skupper
 
       - name: wait for k3s to finish starting
         run: |
           timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
           timeout 1m bash -c 'until k3s kubectl get nodes; do sleep 1; done' || :
           k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
-          k3s kubectl get node
 
-      #      - uses: ./.github/actions/k3s
-
-      - name: kubectl?
+      - name: run integration tests
         run: |
-          kubectl --help
-          kubectl get node
-          k3s --help
-          kubectl wait --for=condition=Ready nodes --all --timeout=600s
+          export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
+          go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         env:
           KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
