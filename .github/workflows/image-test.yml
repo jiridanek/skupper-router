@@ -19,7 +19,7 @@
 
 name: Test skupper-router main
 
-on: [push]
+on: [ push ]
 
 jobs:
   test-image:
@@ -28,6 +28,10 @@ jobs:
     steps:
 
       - uses: actions/checkout@v2
+
+      - name: prepare-local-actions
+        run: npm install
+        working-directory: ./.github/actions/k3s
 
       - uses: ./.github/actions/k3s
 
