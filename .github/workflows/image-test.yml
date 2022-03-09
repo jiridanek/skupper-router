@@ -38,7 +38,7 @@ jobs:
 
       - name: install k3s
         run: |
-          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 sh -
+          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 INSTALL_K3S_EXED="--disable servicelb" sh -
 
       - uses: actions/checkout@v2
         with:
@@ -64,6 +64,27 @@ jobs:
           timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
           timeout 1m bash -c 'until k3s kubectl get nodes; do sleep 1; done' || :
           k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
+
+      - name: configure k3s
+        run |
+          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+          k3s kubectl apply -f <<<EOF
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            namespace: metallb-system
+            name: config
+          data:
+            config: |
+              address-pools:
+              - name: default
+                protocol: layer2
+                addresses:
+                - 192.168.64.23-192.168.64.200
+          EOF
+
+
 
       - name: run integration tests
         run: |
