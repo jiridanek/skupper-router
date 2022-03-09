@@ -66,10 +66,10 @@ jobs:
           k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
 
       - name: configure k3s
-        run |
+        run: |
           k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
           k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
-          k3s kubectl apply -f <<<EOF
+          cat <<EOF | k3s kubectl apply -f -
           apiVersion: v1
           kind: ConfigMap
           metadata:
@@ -83,8 +83,6 @@ jobs:
                 addresses:
                 - 192.168.64.23-192.168.64.200
           EOF
-
-
 
       - name: run integration tests
         run: |
