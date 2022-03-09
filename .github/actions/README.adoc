@@ -1,0 +1,7 @@
+https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action
+
+https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions
+
+https://github.com/actions/toolkit
+
+https://github.com/actions/hello-world-javascript-action
