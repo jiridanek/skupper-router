@@ -23,7 +23,9 @@ that might cause problems, or caused issues in the past.
 For example, unresolvable host names.
 """
 
+import logging
 import os
+import subprocess
 from threading import Timer
 from subprocess import PIPE, STDOUT
 from typing import ClassVar
@@ -186,7 +188,11 @@ class RouterTestIdFailCtrlChar(TestCase):
             ['qdrouterd', '-c', conf_path, '-I', lib_include_path],
             stdin=PIPE, stdout=PIPE, stderr=STDOUT, expect=Process.EXIT_FAIL,
             universal_newlines=True)
-        out = p.communicate(timeout=5)[0]
+        try:
+            out = p.communicate(timeout=5)[0]
+        except subprocess.TimeoutExpired as e:
+            logging.warning("p.communicate failed after timeout with stdout: %s, stderr: %s", e.stdout, e.stderr)
+            raise
         try:
             p.teardown()
         except Exception as e:
