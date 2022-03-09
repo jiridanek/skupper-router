@@ -17,25 +17,22 @@
 # under the License.
 #
 
-name: Publish skupper-router main
-on:
-  workflow_run:
-    workflows: [ "Build" ]
-    branches: [ main ]
-    types:
-      - completed
+name: Test skupper-router main
+
+on: [push]
+
 jobs:
-  build-image:
+  test-image:
     name: Publish skupper-router image
     runs-on: ubuntu-latest
     steps:
 
       - uses: actions/checkout@v2
 
-      - name: build and publish the main image
+      - uses: ./.github/actions/k3s
+
+      - name: kubectl?
         run: |
-          . ./.github/scripts/common.sh
-          ./.github/scripts/image.sh
-        env:
-          DOCKER_USER: '${{ secrets.DOCKER_USER }}'
-          DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+          kubectl --help
+          kubectl get nodes
+          k3s --help
