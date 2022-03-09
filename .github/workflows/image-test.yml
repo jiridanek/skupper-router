@@ -38,7 +38,7 @@ jobs:
           curl -sfL https://get.k3s.io | sudo sh -
           k3s kubectl get node
         env:
-          K3S_KUBECONFIG_MODE: 644
+          K3S_KUBECONFIG_MODE: "644"
 
       #      - uses: ./.github/actions/k3s
 
