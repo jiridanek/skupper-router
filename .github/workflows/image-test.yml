@@ -40,6 +40,41 @@ jobs:
         run: |
           curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 INSTALL_K3S_EXED="--disable servicelb" sh -
 
+      - name: wait for k3s to finish starting
+        run: |
+          timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
+          timeout 1m bash -c 'until k3s kubectl get nodes; do sleep 1; done' || :
+          k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
+
+      - name: configure k3s
+        run: |
+          # see what changes would be made, returns nonzero returncode if different
+          #kubectl get configmap kube-proxy -n kube-system -o yaml | \
+          #sed -e "s/strictARP: false/strictARP: true/" | \
+          #kubectl diff -f - -n kube-system
+          
+          # actually apply the changes, returns nonzero returncode on errors only
+          #k3s kubectl get configmap kube-proxy -n kube-system -o yaml | \
+          #sed -e "s/strictARP: false/strictARP: true/" | \
+          #k3s kubectl apply -f - -n kube-system
+
+          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
+          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+          cat <<EOF | k3s kubectl apply -f -
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            namespace: metallb-system
+            name: config
+          data:
+            config: |
+              address-pools:
+              - name: default
+                protocol: layer2
+                addresses:
+                - 192.168.1.230-192.168.1.250
+          EOF
+
       - uses: actions/checkout@v2
         with:
           repository: 'skupperproject/skupper'
@@ -59,40 +94,7 @@ jobs:
           make all
         working-directory: skupper
 
-      - name: wait for k3s to finish starting
-        run: |
-          timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
-          timeout 1m bash -c 'until k3s kubectl get nodes; do sleep 1; done' || :
-          k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
 
-      - name: configure k3s
-        run: |
-          # see what changes would be made, returns nonzero returncode if different
-          #kubectl get configmap kube-proxy -n kube-system -o yaml | \
-          #sed -e "s/strictARP: false/strictARP: true/" | \
-          #kubectl diff -f - -n kube-system
-          
-          # actually apply the changes, returns nonzero returncode on errors only
-          k3s kubectl get configmap kube-proxy -n kube-system -o yaml | \
-          sed -e "s/strictARP: false/strictARP: true/" | \
-          k3s kubectl apply -f - -n kube-system
-
-          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
-          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
-          cat <<EOF | k3s kubectl apply -f -
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            namespace: metallb-system
-            name: config
-          data:
-            config: |
-              address-pools:
-              - name: default
-                protocol: layer2
-                addresses:
-                - 192.168.1.230-192.168.1.250
-          EOF
 
       - name: run integration tests
         run: |
