@@ -25,18 +25,28 @@ jobs:
   test-image:
     name: Publish skupper-router image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        skupperGitRef: [ 0.8.7 ]
+
     steps:
 
-      - uses: actions/checkout@v2
-
-      - name: prepare-local-actions
-        run: npm install
-        working-directory: ./.github/actions/k3s
-
-      - name: do it
+      - name: install k3s
         run: |
-          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 sh -
-          timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; echo -n .; done' || :
+          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 sh -      
+
+      - uses: actions/checkout@v2
+        with:
+          repository: 'skupperproject/skupper'
+          ref: ${{ matrix.skupperGitRef }}
+          path: 'skupper'
+
+
+
+      - name: wait for k3s to finish starting
+        run: |
+          timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
+          timeout 1m bash -c 'until k3s kubectl get nodes; do sleep 1; done' || :
           k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
           k3s kubectl get node
 
