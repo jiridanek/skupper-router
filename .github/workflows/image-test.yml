@@ -33,10 +33,15 @@ jobs:
         run: npm install
         working-directory: ./.github/actions/k3s
 
-      - uses: ./.github/actions/k3s
+      - name: do it
+        run: |
+          curl -sfL https://get.k3s.io | sudo sh -
+          k3s kubectl get node
+
+      #      - uses: ./.github/actions/k3s
 
       - name: kubectl?
         run: |
           kubectl --help
-          kubectl get nodes
+          kubectl get node
           k3s --help
