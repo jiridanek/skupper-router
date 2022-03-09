@@ -1,0 +1,16 @@
+name: 'actions-k3s'
+description: 'Start k3s cluster and run kubectl commands'
+inputs:
+  version:
+    description: 'Version of k3s'
+    required: true
+    default: 'v1.0.0'
+outputs:
+  kubeconfig: # id of output
+    description: 'Kubeconfig location'
+branding:
+  icon: "box"
+  color: "green"
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
