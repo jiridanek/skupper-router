@@ -22,13 +22,5 @@
 # Building the skupper-router image
 ${DOCKER} build -t ${PROJECT_NAME}:${PROJECT_TAG} -f ./.github/scripts/Dockerfile .
 
-# Pushing only when credentials available
-if [[ -n "${DOCKER_USER}" && -n "${DOCKER_PASSWORD}" ]]; then
-    ${DOCKER} login -u ${DOCKER_USER} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTRY}
-    ${DOCKER} tag ${PROJECT_NAME}:${PROJECT_TAG} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}
-    ${DOCKER} push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}
-    if ${PUSH_LATEST}; then
-        ${DOCKER} tag ${PROJECT_NAME}:${PROJECT_TAG} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:latest
-        ${DOCKER} push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:latest
-    fi
-fi
+echo "::set-output name=image-tag::${PROJECT_NAME}:${PROJECT_TAG}"
+

@@ -18,22 +18,34 @@
 #
 
 name: Publish skupper-router main
-on:
-  workflow_run:
-    workflows: ["Build"]
-    branches: [main]
-    types:
-      - completed
+on: [push, pull_request, workflow_dispatch]
 jobs:
   build-image:
     name: Publish skupper-router image
     runs-on: ubuntu-latest
     steps:
+
       - uses: actions/checkout@v2
-      - run: |
-          # build and publish the main image
+
+      - name: build the main image
+        id: image-build
+        run: |
           . ./.github/scripts/common.sh
-          ./.github/scripts/image.sh
+          ./.github/scripts/image-build.sh
+        env:
+          DOCKER_USER: '${{ secrets.DOCKER_USER }}'
+          DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+
+      - name: run tests (skupper integration tests)
+        uses: ./.github/actions/skupper-integration-tests
+        with:
+          qdrouterdImage: "${{ steps.image-build.outputs.image-tag  }}"
+
+      - name: publish the main image
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          . ./.github/scripts/common.sh
+          ./.github/scripts/image-push.sh
         env:
           DOCKER_USER: '${{ secrets.DOCKER_USER }}'
           DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
