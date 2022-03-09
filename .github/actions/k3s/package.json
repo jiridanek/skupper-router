@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "skupper-router-actions-k3s",
   "version": "1.0.0",
   "dependencies": {
