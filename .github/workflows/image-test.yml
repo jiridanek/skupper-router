@@ -31,15 +31,28 @@ jobs:
 
     steps:
 
+      - id: go-cache-paths
+        run: |
+          echo "::set-output name=go-build::$(go env GOCACHE)"
+          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
+
       - name: install k3s
         run: |
-          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 sh -      
+          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 sh -
 
       - uses: actions/checkout@v2
         with:
           repository: 'skupperproject/skupper'
           ref: ${{ matrix.skupperGitRef }}
           path: 'skupper'
+
+      - name: Go Build Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ steps.go-cache-paths.outputs.go-build }}
+            ${{ steps.go-cache-paths.outputs.go-mod }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
       - name: compile skupper
         run:
