@@ -38,7 +38,7 @@ jobs:
 
       - name: install k3s
         run: |
-          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 INSTALL_K3S_EXED="--disable servicelb" sh -
+          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 INSTALL_K3S_EXED="--disable=traefik --disable=servicelb" sh -
 
       - name: wait for k3s to finish starting
         run: |
