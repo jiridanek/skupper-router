@@ -17,6 +17,9 @@
 # under the License.
 #
 
+# waits:
+# first wait to have at least one of a type, then wait for all to be in a state; if waiting for state with empty set, kubectl fails
+
 name: Test skupper-router main
 
 on: [ push ]
@@ -43,7 +46,7 @@ jobs:
       - name: wait for k3s to finish starting
         run: |
           timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
-          timeout 1m bash -c 'until k3s kubectl get nodes; do sleep 1; done' || :
+          timeout 1m bash -c 'until [[ $(k3s kubectl get nodes --output name | wc -l) -gt 0 ]]; do sleep 1; done' || :
           k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
 
       - name: configure k3s
@@ -75,9 +78,10 @@ jobs:
                 - 192.168.1.230-192.168.1.250
           EOF
 
-      - name: print stuff
+      - name: wait for metallb
         run: |
-          for i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
+          timeout 1m bash -c 'until [[ $(k3s kubectl get pods --namespace=metallb-system --output name | wc -l) -gt 0 ]]; do sleep 1; done' || :
+          k3s kubectl wait --namespace=metallb-system --for=condition=Ready pods --all --timeout=600s
 
       - name: add sec
         if: "${{ always() }}"
