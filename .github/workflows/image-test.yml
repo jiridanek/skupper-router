@@ -90,6 +90,7 @@ jobs:
           for i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
 
       - uses: actions/checkout@v2
+        if: "${{ always() }}"
         with:
           repository: 'skupperproject/skupper'
           ref: ${{ matrix.skupperGitRef }}
@@ -97,6 +98,7 @@ jobs:
 
       - name: Go Build Cache
         uses: actions/cache@v2
+        if: "${{ always() }}"
         with:
           path: |
             ${{ steps.go-cache-paths.outputs.go-build }}
@@ -104,6 +106,7 @@ jobs:
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
       - name: compile skupper
+        if: "${{ always() }}"
         run:
           make all
         working-directory: skupper
@@ -111,6 +114,7 @@ jobs:
 
 
       - name: run integration tests
+        if: "${{ always() }}"
         run: |
           export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
