@@ -96,13 +96,13 @@ jobs:
 
 
 
-#      - name: run integration tests
-#        run: |
-#          export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
-#          go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
-#        working-directory: skupper
-#        env:
-#          KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
+      - name: run integration tests
+        run: |
+          export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
+          go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
+        working-directory: skupper
+        env:
+          KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
 
       - name: dump k3s log
         if: "${{ always() }}"
