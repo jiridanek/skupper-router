@@ -768,11 +768,7 @@ class PolicyLinkNamePatternTest(TestCase):
             ('policy', {'maxConnections': 2, 'policyDir': policy_config_path, 'enableVhostPolicy': 'true'})
         ])
 
-        cls.router = cls.tester.qdrouterd('PolicyLinkNamePatternTest', config, wait=False)
-        try:
-            cls.router.wait_ready(timeout=5)
-        except Exception as e:
-            pass
+        cls.router = cls.tester.qdrouterd('PolicyLinkNamePatternTest', config, wait=True)
 
     def address(self):
         return self.router.addresses[0]
