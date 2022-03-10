@@ -39,59 +39,25 @@ jobs:
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
 
-      - name: install k3s
+      - name: install microk8s
         run: |
-          curl -sfL https://get.k3s.io | sudo K3S_KUBECONFIG_MODE=644 INSTALL_K3S_EXED="--docker --disable=traefik --disable=servicelb" sh -
+          sudo snap install microk8s --classic --channel=1.21/stable
+          microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
+          microk8s status --wait-ready
+
+          mkdir -p $HOME/.kube
+          microk8s config > $HOME/.kube/config
 
       - name: wait for k3s to finish starting
         run: |
           timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
-          timeout 1m bash -c 'until [[ $(k3s kubectl get nodes --output name | wc -l) -gt 0 ]]; do sleep 1; done' || :
-          k3s kubectl wait --for=condition=Ready nodes --all --timeout=600s
-
-      - name: configure k3s
-        run: |
-          # see what changes would be made, returns nonzero returncode if different
-          #kubectl get configmap kube-proxy -n kube-system -o yaml | \
-          #sed -e "s/strictARP: false/strictARP: true/" | \
-          #kubectl diff -f - -n kube-system
-          
-          # actually apply the changes, returns nonzero returncode on errors only
-          #k3s kubectl get configmap kube-proxy -n kube-system -o yaml | \
-          #sed -e "s/strictARP: false/strictARP: true/" | \
-          #k3s kubectl apply -f - -n kube-system
-
-          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml
-          k3s kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
-          cat <<EOF | k3s kubectl apply -f -
-          apiVersion: v1
-          kind: ConfigMap
-          metadata:
-            namespace: metallb-system
-            name: config
-          data:
-            config: |
-              address-pools:
-              - name: default
-                protocol: layer2
-                addresses:
-                - 192.168.1.230-192.168.1.250
-          EOF
-
-      - name: wait for metallb
-        run: |
-          timeout 1m bash -c 'until [[ $(k3s kubectl get pods --namespace=metallb-system --output name | wc -l) -gt 0 ]]; do sleep 1; done' || :
-          k3s kubectl wait --namespace=metallb-system --for=condition=Ready pods --all --timeout=600s
-
-      - name: add sec
-        if: "${{ always() }}"
-        run: |
-          k3s kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+          timeout 1m bash -c 'until [[ $(microk8s kubectl get nodes --output name | wc -l) -gt 0 ]]; do sleep 1; done' || :
+          microk8s kubectl wait --for=condition=Ready nodes --all --timeout=600s
 
       - name: print stuff
         if: "${{ always() }}"
         run: |
-          for i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
+          for i in `seq 10`; do k3s kubectl get pods --all-namespaces; sleep 1; done
 
       - uses: actions/checkout@v2
         if: "${{ always() }}"
