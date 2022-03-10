@@ -42,6 +42,8 @@ jobs:
       - name: install microk8s
         run: |
           sudo snap install microk8s --classic --channel=1.21/stable
+          sudo usermod -a -G microk8s runner
+          sudo chown -f -R runner ~/.kube
           microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
           microk8s status --wait-ready
 
@@ -57,7 +59,7 @@ jobs:
       - name: print stuff
         if: "${{ always() }}"
         run: |
-          for i in `seq 10`; do k3s kubectl get pods --all-namespaces; sleep 1; done
+          for i in `seq 10`; do microk8s kubectl get pods --all-namespaces; sleep 1; done
 
       - uses: actions/checkout@v2
         if: "${{ always() }}"
