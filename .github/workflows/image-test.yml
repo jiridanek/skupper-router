@@ -77,7 +77,7 @@ jobs:
 
       - name: print stuff
         run: |
-          while i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
+          for i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
 
       - name: add sec
         if: "${{ always() }}"
@@ -87,7 +87,7 @@ jobs:
       - name: print stuff
         if: "${{ always() }}"
         run: |
-          while i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
+          for i in `seq 100`; do k3s kubectl get pods --all-namespaces; sleep 1; done
 
       - uses: actions/checkout@v2
         with:
