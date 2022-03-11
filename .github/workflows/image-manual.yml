@@ -63,8 +63,11 @@ jobs:
 
       - name: upload image as artifact
         run: |
+          export PROJECT_TAG="${DOCKER_TAG}"
           docker save ${PROJECT_NAME}:${PROJECT_TAG} > myimage.tgz
           echo "${PROJECT_NAME}:${PROJECT_TAG}" > image.txt
+        env:
+          DOCKER_TAG: '${{github.event.inputs.dockerTag}}'
 
       - name: Upload archive
         uses: actions/upload-artifact@v2
