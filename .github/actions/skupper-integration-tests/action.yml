@@ -55,6 +55,7 @@ runs:
         run: |
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
+        shell: bash
 
       # https://microk8s.io/docs/addon-metallb
       - name: Install microk8s
@@ -62,17 +63,20 @@ runs:
           sudo snap install microk8s --classic --channel=1.21/stable
           sudo microk8s enable dns ingress registry:size=20Gi host-access:ip=10.0.1.1 metallb:10.64.140.43-10.64.140.49
           sudo microk8s status --wait-ready
+        shell: bash
 
       - name: Export microk8s config
         if: "${{ always() }}"
         run: |
           mkdir -p $HOME/.kube
           sudo microk8s config > $HOME/.kube/config
+        shell: bash
 
       - name: Push image into microk8s
         run: |
           docker tag ${{ inputs.qdrouterdImage }} localhost:32000/skupper-router:registry
           docker push localhost:32000/skupper-router:registry
+        shell: bash
 
       - name: Checkout Skupper
         uses: actions/checkout@v2
@@ -94,6 +98,7 @@ runs:
           make all
           sudo install skupper /usr/local/bin
         working-directory: skupper
+        shell: bash
 
       - name: Run Skupper integration tests
         run: |
@@ -102,19 +107,23 @@ runs:
 
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
+        shell: bash
 
       # https://github.com/canonical/microk8s/issues/1660
       - name: Dump microk8s log (apiserver)
         if: "${{ always() }}"
         run: |
           sudo journalctl -u snap.microk8s.daemon-apiserver
+        shell: bash
 
       - name: Dump microk8s log (kubelet)
         if: "${{ always() }}"
         run: |
           sudo journalctl -u snap.microk8s.daemon-kubelet
+        shell: bash
 
       - name: Dump microk8s log (kubelite)
         if: "${{ always() }}"
         run: |
           sudo journalctl -u snap.microk8s.daemon-kubelite
+        shell: bash
