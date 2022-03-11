@@ -68,7 +68,6 @@ jobs:
           qdrouterdImage: "${{ steps.docker-build.outputs.image-tag  }}"
 
       - name: publish a custom image
-        if: ${{ secrets.DOCKER_USER && secrets.DOCKER_PASSWORD }}
         run: |
           . ./.github/scripts/common.sh
           export PROJECT_TAG="${DOCKER_TAG}"
