@@ -75,6 +75,7 @@ runs:
       - name: Push image into microk8s
         run: |
           docker tag "${{ inputs.qdrouterdImage }}" localhost:32000/skupper-router:registry
+          timeout 5m bash -c 'until nc -z localhost 32000; do sleep 1; done' || :
           docker push localhost:32000/skupper-router:registry
         shell: bash
 
