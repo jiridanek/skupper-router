@@ -34,38 +34,30 @@ jobs:
 
     steps:
 
+      - name: Get GO caching paths
       - id: go-cache-paths
         run: |
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
 
-
-      #mkdir -p $HOME/.kube
-      #sudo microk8s config > $HOME/.kube/config
-      - name: install microk8s
+      - name: Install microk8s
         run: |
           sudo snap install microk8s --classic --channel=1.21/stable
           sudo microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
           sudo microk8s status --wait-ready
 
-#      - name: instrukce
-#        if: "${{ always() }}"
-#        run: |
-#          sudo usermod -a -G microk8s runner
-#          sudo chown -f -R runner ~/.kube
-#          newgrp microk8s
-
-      - name: export config
+      - name: Export microk8s config
         if: "${{ always() }}"
         run: |
           mkdir -p $HOME/.kube
           sudo microk8s config > $HOME/.kube/config
 
-      - name: print stuff
+      - name: Print stuff
         if: "${{ always() }}"
         run: |
           for i in `seq 10`; do kubectl get pods --all-namespaces; sleep 1; done
 
+      - name: Checkout Skupper
       - uses: actions/checkout@v2
         if: "${{ always() }}"
         with:
@@ -73,7 +65,7 @@ jobs:
           ref: ${{ matrix.skupperGitRef }}
           path: 'skupper'
 
-      - name: Go Build Cache
+      - name: Fetch Go cache
         uses: actions/cache@v2
         if: "${{ always() }}"
         with:
@@ -82,28 +74,20 @@ jobs:
             ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
-      - name: compile skupper
+      - name: Compile Skupper
         if: "${{ always() }}"
         run:
           make all
         working-directory: skupper
 
-
-
-      - name: run integration tests
+      - name: Run Skupper integration tests
         if: "${{ always() }}"
         run: |
           export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
-        env:
-          KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
 
-      - name: dump k3s log
+      - name: Dump microk8s log
         if: "${{ always() }}"
         run: |
-          sudo journalctl -u k3s
-
-#           --disable=traefik --disable=servicelb  https://github.com/docker/build-push-action/blob/master/docs/advanced/share-image-jobs.md
-# https://github.com/docker/build-push-action/issues/225
-# https://medium.com/thermokline/comparing-k8s-load-balancers-2f5c76ea8f31
+          sudo journalctl -u microk8s
