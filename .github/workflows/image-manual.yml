@@ -64,7 +64,8 @@ jobs:
       - name: upload image as artifact
         run: |
           export PROJECT_TAG="${DOCKER_TAG}"
-          docker save ${PROJECT_NAME}:${PROJECT_TAG} > myimage.tgz
+          export PROJECT_NAME=skupper-router
+          docker save "${PROJECT_NAME}:${PROJECT_TAG}" > myimage.tgz
           echo "${PROJECT_NAME}:${PROJECT_TAG}" > image.txt
         env:
           DOCKER_TAG: '${{github.event.inputs.dockerTag}}'
