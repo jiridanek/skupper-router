@@ -22,7 +22,8 @@
 
 name: Test skupper-router main
 
-on: [ push ]
+# on: [ push ]
+on: [ workflow_dispatch ]
 
 jobs:
   test-image:
@@ -62,7 +63,6 @@ jobs:
 
       - name: Checkout Skupper
         uses: actions/checkout@v2
-        if: "${{ always() }}"
         with:
           repository: 'skupperproject/skupper'
           ref: ${{ matrix.skupperGitRef }}
@@ -70,7 +70,6 @@ jobs:
 
       - name: Restore Go cache
         uses: actions/cache@v2
-        if: "${{ always() }}"
         with:
           path: |
             ${{ steps.go-cache-paths.outputs.go-build }}
@@ -78,14 +77,12 @@ jobs:
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
       - name: Compile Skupper
-        if: "${{ always() }}"
         run: |
           make all
           sudo install skupper /usr/local/bin
         working-directory: skupper
 
       - name: Run Skupper integration tests
-        if: "${{ always() }}"
         run: |
           export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
           export PUBLIC_1_INGRESS_HOST=10.0.1.1

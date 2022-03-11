@@ -60,3 +60,13 @@ jobs:
           DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
           PROTON_SOURCE_URL: '${{github.event.inputs.protonSourceUrl}}'
           DOCKER_TAG: '${{github.event.inputs.dockerTag}}'
+
+      - name: upload image as artifact
+        run: |
+          docker save ${PROJECT_NAME}:${PROJECT_TAG} > myimage.tgz
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v2
+        with:
+          name: skupper-router.tgz
+          path: myimage.tgz
