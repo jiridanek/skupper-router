@@ -40,6 +40,7 @@ jobs:
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
 
+      # https://microk8s.io/docs/addon-metallb
       - name: Install microk8s
         run: |
           sudo snap install microk8s --classic --channel=1.21/stable
@@ -80,7 +81,7 @@ jobs:
         if: "${{ always() }}"
         run: |
           export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
-          export PUBLIC_1_INGRESS_HOST=localhost
+          export PUBLIC_1_INGRESS_HOST=$(hostname --fqdn)
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
 
