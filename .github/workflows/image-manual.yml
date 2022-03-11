@@ -73,10 +73,12 @@ jobs:
           DOCKER_TAG: '${{github.event.inputs.dockerTag}}'
 
       - name: Upload archive
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: skupper-router.tgz
-          path: myimage.tgz
+          path: |
+            myimage.tgz
+            image.txt
 
   test-image:
     name: Publish skupper-router image
