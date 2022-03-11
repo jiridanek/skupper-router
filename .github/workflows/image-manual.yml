@@ -94,6 +94,6 @@ jobs:
         with:
           path: 'skupper-router'
       - name: Use local my-action
-        uses: ./.github/workflows/image-test
+        uses: ./skupper-router/.github/workflows/image-test
         with:
           qdrouterdImage: skupper-router:main
