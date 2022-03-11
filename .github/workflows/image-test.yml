@@ -35,6 +35,15 @@ jobs:
 
     steps:
 
+# As of version 18.03, you can use host.docker.internal as the host's IP.
+      - name: Download math result for job 2
+        uses: actions/download-artifact@v3
+        with:
+          name: skupper-router.tgz
+
+      - name: push image
+        run: sudo microk8s ctr -n k8s.io image import myimage.tgz
+
 # Use currently built image
 # also consider https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane.md but likely overkill
 # $ docker save hello-web > hello-web.tar
@@ -84,7 +93,8 @@ jobs:
 
       - name: Run Skupper integration tests
         run: |
-          export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
+          export QDROUTERD_IMAGE=$(cat ../image.txt)
+          echo $QDROUTERD_IMAGE
           export PUBLIC_1_INGRESS_HOST=10.0.1.1
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper

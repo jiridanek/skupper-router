@@ -64,6 +64,7 @@ jobs:
       - name: upload image as artifact
         run: |
           docker save ${PROJECT_NAME}:${PROJECT_TAG} > myimage.tgz
+          echo "${PROJECT_NAME}:${PROJECT_TAG}" > image.txt
 
       - name: Upload archive
         uses: actions/upload-artifact@v2
