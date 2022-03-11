@@ -48,7 +48,7 @@ jobs:
           microk8s status --wait-ready
 
           mkdir -p $HOME/.kube
-          microk8s config > $HOME/.kube/config
+          sudo microk8s config > $HOME/.kube/config
 
       - name: wait for k3s to finish starting
         run: |
