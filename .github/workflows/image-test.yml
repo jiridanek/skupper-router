@@ -39,16 +39,17 @@ jobs:
           echo "::set-output name=go-build::$(go env GOCACHE)"
           echo "::set-output name=go-mod::$(go env GOMODCACHE)"
 
+
+      #mkdir -p $HOME/.kube
+      #sudo microk8s config > $HOME/.kube/config
       - name: install microk8s
         run: |
           sudo snap install microk8s --classic --channel=1.21/stable
+          sudo microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
+          sudo microk8s status --wait-ready
           sudo usermod -a -G microk8s runner
           sudo chown -f -R runner ~/.kube
-          microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
-          microk8s status --wait-ready
 
-          mkdir -p $HOME/.kube
-          sudo microk8s config > $HOME/.kube/config
 
       - name: wait for k3s to finish starting
         run: |
