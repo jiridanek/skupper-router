@@ -89,11 +89,7 @@ jobs:
         skupperGitRef: [ 0.8.7 ]
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-        with:
-          path: 'skupper-router'
       - name: Use local my-action
-        uses: ./skupper-router/.github/workflows/image-test.yml
+        uses: ./.github/workflows/image-test.yml
         with:
           qdrouterdImage: skupper-router:main
