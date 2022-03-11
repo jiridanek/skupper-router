@@ -80,7 +80,7 @@ jobs:
         if: "${{ always() }}"
         run: |
           export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
-          export PUBLIC_1_INGRESS_HOST=127.0.0.1
+          export PUBLIC_1_INGRESS_HOST=localhost
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
 
