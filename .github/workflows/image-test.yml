@@ -58,7 +58,7 @@ jobs:
           for i in `seq 10`; do kubectl get pods --all-namespaces; sleep 1; done
 
       - name: Checkout Skupper
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
         if: "${{ always() }}"
         with:
           repository: 'skupperproject/skupper'
