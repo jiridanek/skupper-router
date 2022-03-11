@@ -44,7 +44,7 @@ jobs:
       - name: Install microk8s
         run: |
           sudo snap install microk8s --classic --channel=1.21/stable
-          sudo microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
+          sudo microk8s enable dns ingress registry host-access:ip=10.0.1.1 metallb:10.64.140.43-10.64.140.49
           sudo microk8s status --wait-ready
 
       - name: Export microk8s config
@@ -81,7 +81,7 @@ jobs:
         if: "${{ always() }}"
         run: |
           export QDROUTERD_IMAGE=quay.io/jdanek/skupper-router:latest
-          export PUBLIC_1_INGRESS_HOST=$(hostname --fqdn)
+          export PUBLIC_1_INGRESS_HOST=10.0.1.1
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
 
