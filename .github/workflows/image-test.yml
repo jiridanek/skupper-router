@@ -34,6 +34,13 @@ jobs:
 
     steps:
 
+# Use currently built image
+# also consider https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane.md but likely overkill
+# $ docker save hello-web > hello-web.tar
+# sudo microk8s.ctr -n k8s.io image import hello-web.tar
+# sudo microk8s.ctr -n k8s.io images ls --name~=hello-web
+# sudo docker build . -t localhost:32000/hello-web:v3
+
       - name: Get Go cache paths
         id: go-cache-paths
         run: |
