@@ -95,3 +95,8 @@ jobs:
         if: "${{ always() }}"
         run: |
           sudo journalctl -u snap.microk8s.daemon-kubelet
+
+      - name: Dump microk8s log (kubelite)
+        if: "${{ always() }}"
+        run: |
+          sudo journalctl -u snap.microk8s.daemon-kubelite
