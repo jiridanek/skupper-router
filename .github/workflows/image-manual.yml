@@ -66,7 +66,7 @@ jobs:
           export PROJECT_TAG="${DOCKER_TAG}"
           export PROJECT_NAME=skupper-router
           docker save "skupper-router:main" > myimage.tgz
-          echo "${PROJECT_NAME}:${PROJECT_TAG}" > image.txt
+          echo "skupper-router:main" > image.txt
         env:
           DOCKER_TAG: '${{github.event.inputs.dockerTag}}'
 
@@ -86,14 +86,6 @@ jobs:
 
     steps:
 
-      - name: Download math result for job 2
-        uses: actions/download-artifact@v3
-        with:
-          name: skupper-router.tgz
-
-      - name: push image
-        run: sudo microk8s ctr -n k8s.io image import myimage.tgz
-
       - name: Get Go cache paths
         id: go-cache-paths
         run: |
@@ -111,6 +103,14 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           sudo microk8s config > $HOME/.kube/config
+
+      - name: Download math result for job 2
+        uses: actions/download-artifact@v3
+        with:
+          name: skupper-router.tgz
+
+      - name: push image
+        run: sudo microk8s ctr -n k8s.io image import myimage.tgz
 
       - name: Checkout Skupper
         uses: actions/checkout@v2
