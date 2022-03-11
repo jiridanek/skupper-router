@@ -76,7 +76,7 @@ jobs:
 
       - name: Compile Skupper
         if: "${{ always() }}"
-        run:
+        run: |
           make all
           sudo install skupper /usr/local/bin
         working-directory: skupper
