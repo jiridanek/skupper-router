@@ -17,6 +17,8 @@
 # under the License.
 #
 
+# gh workflow run --repo jiridanek/skupper-router --ref jd_2022_03_10_microk8s_tests image-manual.yml
+
 name: Manual skupper-router image build
 on:
   workflow_dispatch:
@@ -110,7 +112,7 @@ jobs:
           name: skupper-router.tgz
 
       - name: push image
-        run: sudo microk8s ctr -n k8s.io image import myimage.tgz
+        run: sudo microk8s ctr image import myimage.tgz
 
       - name: Checkout Skupper
         uses: actions/checkout@v2
