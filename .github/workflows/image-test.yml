@@ -52,11 +52,6 @@ jobs:
           mkdir -p $HOME/.kube
           sudo microk8s config > $HOME/.kube/config
 
-      - name: Print stuff
-        if: "${{ always() }}"
-        run: |
-          for i in `seq 10`; do kubectl get pods --all-namespaces; sleep 1; done
-
       - name: Checkout Skupper
         uses: actions/checkout@v2
         if: "${{ always() }}"
@@ -89,7 +84,13 @@ jobs:
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
 
-      - name: Dump microk8s log
+      # https://github.com/canonical/microk8s/issues/1660
+      - name: Dump microk8s log (apiserver)
         if: "${{ always() }}"
         run: |
-          sudo journalctl -u microk8s
+          sudo journalctl -u snap.microk8s.daemon-apiserver
+
+      - name: Dump microk8s log (kubelet)
+        if: "${{ always() }}"
+        run: |
+          sudo journalctl -u snap.microk8s.daemon-kubelet
