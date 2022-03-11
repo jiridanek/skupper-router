@@ -34,7 +34,7 @@ jobs:
 
     steps:
 
-      - name: Get GO caching paths
+      - name: Get Go cache paths
         id: go-cache-paths
         run: |
           echo "::set-output name=go-build::$(go env GOCACHE)"
@@ -65,7 +65,7 @@ jobs:
           ref: ${{ matrix.skupperGitRef }}
           path: 'skupper'
 
-      - name: Fetch Go cache
+      - name: Restore Go cache
         uses: actions/cache@v2
         if: "${{ always() }}"
         with:
@@ -78,6 +78,7 @@ jobs:
         if: "${{ always() }}"
         run:
           make all
+          sudo install skupper /usr/local/bin
         working-directory: skupper
 
       - name: Run Skupper integration tests
