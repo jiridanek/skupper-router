@@ -89,74 +89,11 @@ jobs:
         skupperGitRef: [ 0.8.7 ]
 
     steps:
-
-      - name: Get Go cache paths
-        id: go-cache-paths
-        run: |
-          echo "::set-output name=go-build::$(go env GOCACHE)"
-          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
-
-      - name: Install microk8s
-        run: |
-          sudo snap install microk8s --classic --channel=1.21/stable
-          sudo microk8s enable dns ingress registry:size=20Gi host-access:ip=10.0.1.1 metallb:10.64.140.43-10.64.140.49
-          sudo microk8s status --wait-ready
-
-      - name: Export microk8s config
-        if: "${{ always() }}"
-        run: |
-          mkdir -p $HOME/.kube
-          sudo microk8s config > $HOME/.kube/config
-
-      - name: Download math result for job 2
-        uses: actions/download-artifact@v3
-        with:
-          name: skupper-router.tgz
-
-      - name: push image
-        run: sudo microk8s ctr image import myimage.tgz
-
-      - name: Checkout Skupper
+      - name: Check out repository
         uses: actions/checkout@v2
         with:
-          repository: 'skupperproject/skupper'
-          ref: ${{ matrix.skupperGitRef }}
-          path: 'skupper'
-
-      - name: Restore Go cache
-        uses: actions/cache@v2
+          path: 'skupper-router'
+      - name: Use local my-action
+        uses: ./skupper-router/.github/actions/image-test.yml
         with:
-          path: |
-            ${{ steps.go-cache-paths.outputs.go-build }}
-            ${{ steps.go-cache-paths.outputs.go-mod }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-
-      - name: Compile Skupper
-        run: |
-          make all
-          sudo install skupper /usr/local/bin
-        working-directory: skupper
-
-      - name: Run Skupper integration tests
-        run: |
-          export QDROUTERD_IMAGE=$(cat ../image.txt)
-          echo $QDROUTERD_IMAGE
-          [[ -z "$QDROUTERD_IMAGE" ]] && exit 1
-          export PUBLIC_1_INGRESS_HOST=10.0.1.1
-          go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
-        working-directory: skupper
-
-      - name: Dump microk8s log (apiserver)
-        if: "${{ always() }}"
-        run: |
-          sudo journalctl -u snap.microk8s.daemon-apiserver
-
-      - name: Dump microk8s log (kubelet)
-        if: "${{ always() }}"
-        run: |
-          sudo journalctl -u snap.microk8s.daemon-kubelet
-
-      - name: Dump microk8s log (kubelite)
-        if: "${{ always() }}"
-        run: |
-          sudo journalctl -u snap.microk8s.daemon-kubelite
+          qdrouterdImage: skupper-router:main
