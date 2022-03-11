@@ -74,7 +74,7 @@ runs:
 
       - name: Push image into microk8s
         run: |
-          docker tag ${{ inputs.qdrouterdImage }} localhost:32000/skupper-router:registry
+          docker tag "${{ inputs.qdrouterdImage }}" localhost:32000/skupper-router:registry
           docker push localhost:32000/skupper-router:registry
         shell: bash
 

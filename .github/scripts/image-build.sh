@@ -22,5 +22,5 @@
 # Building the skupper-router image
 ${DOCKER} build -t ${PROJECT_NAME}:${PROJECT_TAG} -f ./.github/scripts/Dockerfile .
 
-echo echo "::set-output name=image-tag::${PROJECT_NAME}:${PROJECT_TAG}"
+echo "::set-output name=image-tag::${PROJECT_NAME}:${PROJECT_TAG}"
 
