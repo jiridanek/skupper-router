@@ -21,35 +21,27 @@
 # first wait to have at least one of a type, then wait for all to be in a state; if waiting for state with empty set, kubectl fails
 
 name: Test skupper-router main
+description: Execute skupper integration testing
 
-# on: [ push ]
-# on: [ workflow_dispatch ]
-on:
-  workflow_call:
-    input:
-      qdrouterdImage:
-        type: string
-        required: true
-        description: Image to use in skupper integration tests
+inputs:
 
-jobs:
-  test-image:
-    name: Publish skupper-router image
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        skupperGitRef: [ 0.8.7 ]
+  qdrouterdImage:
+    required: true
+    description: Image to use in skupper integration tests
 
-    steps:
+  skupperGitRef:
+    required: false
+    description: Reference to skupper version
+    default: "0.8.7"
+
+runs:
+  using: "composite"
+  steps:
 
 # As of version 18.03, you can use host.docker.internal as the host's IP.
-      - name: Download math result for job 2
-        uses: actions/download-artifact@v3
-        with:
-          name: skupper-router.tgz
 
-      - name: push image
-        run: sudo microk8s ctr -n k8s.io image import myimage.tgz
+#      - name: push image
+#        run: sudo microk8s ctr k8s.io image import myimage.tgz
 
 # Use currently built image
 # also consider https://github.com/google/go-containerregistry/blob/main/cmd/crane/doc/crane.md but likely overkill
@@ -77,11 +69,16 @@ jobs:
           mkdir -p $HOME/.kube
           sudo microk8s config > $HOME/.kube/config
 
+      - name: Push image into microk8s
+        run: |
+          docker tag ${{ inputs.qdrouterdImage }} localhost:32000/skupper-router:registry
+          docker push localhost:32000/skupper-router:registry
+
       - name: Checkout Skupper
         uses: actions/checkout@v2
         with:
           repository: 'skupperproject/skupper'
-          ref: ${{ matrix.skupperGitRef }}
+          ref: "${{ inputs.skupperGitRef }}"
           path: 'skupper'
 
       - name: Restore Go cache
@@ -101,10 +98,7 @@ jobs:
       - name: Run Skupper integration tests
         run: |
           export PUBLIC_1_INGRESS_HOST=10.0.1.1
-
-          export QDROUTERD_IMAGE=${{ inputs.qdrouterdImage }}
-          echo $QDROUTERD_IMAGE
-          [[ -z "$QDROUTERD_IMAGE" ]] && exit 1
+          export QDROUTERD_IMAGE=localhost:32000/skupper-router:registry
 
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
