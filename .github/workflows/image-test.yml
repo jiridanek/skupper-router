@@ -47,15 +47,11 @@ jobs:
           sudo snap install microk8s --classic --channel=1.21/stable
           sudo microk8s enable dns ingress registry metallb:10.64.140.43-10.64.140.49
           sudo microk8s status --wait-ready
-          sudo usermod -a -G microk8s runner
-          sudo chown -f -R runner ~/.kube
 
-
-      - name: wait for k3s to finish starting
+      - name: export config
         run: |
-          timeout 5m bash -c 'until nc -z 127.0.0.1 6443; do sleep 1; done' || :
-          timeout 1m bash -c 'until [[ $(microk8s kubectl get nodes --output name | wc -l) -gt 0 ]]; do sleep 1; done' || :
-          microk8s kubectl wait --for=condition=Ready nodes --all --timeout=600s
+          mkdir -p $HOME/.kube
+          sudo microk8s config > $HOME/.kube/config
 
       - name: print stuff
         if: "${{ always() }}"
