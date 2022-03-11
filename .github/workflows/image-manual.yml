@@ -139,6 +139,7 @@ jobs:
         run: |
           export QDROUTERD_IMAGE=$(cat ../image.txt)
           echo $QDROUTERD_IMAGE
+          [[ -z "$QDROUTERD_IMAGE" ]] && exit 1
           export PUBLIC_1_INGRESS_HOST=10.0.1.1
           go test -count=1 -p=1 -timeout=60m -tags=integration -v ./test/integration/...
         working-directory: skupper
