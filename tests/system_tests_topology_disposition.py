@@ -68,19 +68,19 @@ class ManagementMessageHelper:
         self.reply_addr = reply_addr
 
     def make_connector_query(self, connector_name) :
-        props = {'operation': 'READ', 'type': 'org.apache.qpid.dispatch.connector', 'name' : connector_name}
+        props = {'operation': 'READ', 'type': 'io.skupper.router.connector', 'name' : connector_name}
         msg = Message(properties=props, reply_to=self.reply_addr)
         return msg
 
     def make_connector_delete_command(self, connector_name) :
-        props = {'operation': 'DELETE', 'type': 'org.apache.qpid.dispatch.connector', 'name' : connector_name}
+        props = {'operation': 'DELETE', 'type': 'io.skupper.router.connector', 'name' : connector_name}
         msg = Message(properties=props, reply_to=self.reply_addr)
         return msg
 
     def make_router_link_query(self) :
         props = {'count':      '100',
                  'operation':  'QUERY',
-                 'entityType': 'org.apache.qpid.dispatch.router.link',
+                 'entityType': 'io.skupper.router.router.link',
                  'name':       'self',
                  'type':       'org.amqp.management'
                  }

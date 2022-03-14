@@ -1,7 +1,7 @@
 {
     "description":  "Schema for the Skupper Router management model. See skrouter.json.readme.txt.",
 
-    "prefix": "org.apache.qpid.dispatch",
+    "prefix": "io.skupper.router",
 
     "entityTypes": {
 
@@ -1407,7 +1407,7 @@
                 },
                 "linkRef": {
                     "type": "string",
-                    "description": "Reference to the org.apache.qpid.dispatch.router.link if the link exists",
+                    "description": "Reference to the io.skupper.router.router.link if the link exists",
                     "create": false
                 },
                 "operStatus": {

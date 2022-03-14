@@ -121,11 +121,11 @@ class RouterProxy:
         return Entity(ap['statusCode'], ap['statusDescription'], msg.body)
 
     def read_address(self, name):
-        ap = {'operation': 'READ', 'type': 'org.apache.qpid.dispatch.router.address', 'name': name}
+        ap = {'operation': 'READ', 'type': 'io.skupper.router.router.address', 'name': name}
         return Message(properties=ap, reply_to=self.reply_addr)
 
     def query_addresses(self):
-        ap = {'operation': 'QUERY', 'type': 'org.apache.qpid.dispatch.router.address'}
+        ap = {'operation': 'QUERY', 'type': 'io.skupper.router.router.address'}
         return Message(properties=ap, reply_to=self.reply_addr)
 
 

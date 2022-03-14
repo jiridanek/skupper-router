@@ -347,7 +347,7 @@ def configure_dispatch(dispatch: int, lib_handle: int, filename: str) -> None:
 
     # Configure remaining types except for connector and listener
     for e in config.entities:
-        if not e['type'] in ['org.apache.qpid.dispatch.connector', 'org.apache.qpid.dispatch.listener']:
+        if not e['type'] in ['io.skupper.router.connector', 'io.skupper.router.listener']:
             configure(e)
 
     # Load the vhosts from the .json files in policyDir

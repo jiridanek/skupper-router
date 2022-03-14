@@ -645,7 +645,7 @@ class Qdrouterd(Process):
         Otherwise return None"""
         try:
             ret_val = False
-            response = self.management.query(type="org.apache.qpid.dispatch.connection")
+            response = self.management.query(type="io.skupper.router.connection")
             index_host = response.attribute_names.index('host')
             for result in response.results:
                 outs = '%s:%s' % (host, port)
@@ -668,7 +668,7 @@ class Qdrouterd(Process):
             # Need to rationalize addresses in management attributes.
             # endswith check is because of M/L/R prefixes
             addrs = self.management.query(
-                type='org.apache.qpid.dispatch.router.address',
+                type='io.skupper.router.router.address',
                 attribute_names=['name', 'subscriberCount', 'remoteCount']).get_entities()
 
             addrs = [a for a in addrs if a['name'].endswith(address)]
@@ -682,7 +682,7 @@ class Qdrouterd(Process):
         """
         Block until address has no subscribers
         """
-        a_type = 'org.apache.qpid.dispatch.router.address'
+        a_type = 'io.skupper.router.router.address'
 
         def check():
             addrs = self.management.query(a_type).get_dicts()
@@ -761,7 +761,7 @@ class Qdrouterd(Process):
             # actually ready for traffic. Investigate.
             # Meantime the following actually tests send-thru to the router.
             node = Node.connect(self.addresses[0], router_id, timeout=1)
-            return retry_exception(lambda: node.query('org.apache.qpid.dispatch.router'))
+            return retry_exception(lambda: node.query('io.skupper.router.router'))
         except (proton.ConnectionException, NotFoundStatus, proton.utils.LinkDetached):
             # proton.ConnectionException: the router is not yet accepting connections
             # NotFoundStatus: the queried router is not yet connected
@@ -1323,32 +1323,32 @@ class MgmtMsgProxy:
         return self._Response(ap['statusCode'], ap['statusDescription'], msg.body)
 
     def query_router(self):
-        ap = {'operation': 'QUERY', 'type': 'org.apache.qpid.dispatch.router'}
+        ap = {'operation': 'QUERY', 'type': 'io.skupper.router.router'}
         return Message(properties=ap, reply_to=self.reply_addr)
 
     def query_connections(self):
-        ap = {'operation': 'QUERY', 'type': 'org.apache.qpid.dispatch.connection'}
+        ap = {'operation': 'QUERY', 'type': 'io.skupper.router.connection'}
         return Message(properties=ap, reply_to=self.reply_addr)
 
     def query_links(self):
-        ap = {'operation': 'QUERY', 'type': 'org.apache.qpid.dispatch.router.link'}
+        ap = {'operation': 'QUERY', 'type': 'io.skupper.router.router.link'}
         return Message(properties=ap, reply_to=self.reply_addr)
 
     def query_addresses(self):
         ap = {'operation': 'QUERY',
-              'type': 'org.apache.qpid.dispatch.router.address'}
+              'type': 'io.skupper.router.router.address'}
         return Message(properties=ap, reply_to=self.reply_addr)
 
     def create_connector(self, name, **kwargs):
         ap = {'operation': 'CREATE',
-              'type': 'org.apache.qpid.dispatch.connector',
+              'type': 'io.skupper.router.connector',
               'name': name}
         return Message(properties=ap, reply_to=self.reply_addr,
                        body=kwargs)
 
     def delete_connector(self, name):
         ap = {'operation': 'DELETE',
-              'type': 'org.apache.qpid.dispatch.connector',
+              'type': 'io.skupper.router.connector',
               'name': name}
         return Message(properties=ap, reply_to=self.reply_addr)
 
@@ -1385,7 +1385,7 @@ def get_link_info(name, address):
     Query the router at address for the status and statistics of the named link
     """
     qdm = QdManager(address=address)
-    rc = qdm.query('org.apache.qpid.dispatch.router.link')
+    rc = qdm.query('io.skupper.router.router.link')
     for item in rc:
         if item.get('name') == name:
             return item
@@ -1394,7 +1394,7 @@ def get_link_info(name, address):
 
 def has_mobile_dest_in_address_table(address, dest):
     qdm = QdManager(address=address)
-    rc = qdm.query('org.apache.qpid.dispatch.router.address')
+    rc = qdm.query('io.skupper.router.router.address')
     has_dest = False
     for item in rc:
         if dest in item.get("name"):
@@ -1410,7 +1410,7 @@ def get_inter_router_links(address):
     """
     inter_router_links = []
     qdm = QdManager(address=address)
-    rc = qdm.query('org.apache.qpid.dispatch.router.link')
+    rc = qdm.query('io.skupper.router.router.link')
     for item in rc:
         if item.get("linkType") == "inter-router":
             inter_router_links.append(item)

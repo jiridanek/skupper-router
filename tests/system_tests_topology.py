@@ -56,12 +56,12 @@ class ManagementMessageHelper:
         self.reply_addr = reply_addr
 
     def make_connector_query(self, connector_name):
-        props = {'operation': 'READ', 'type': 'org.apache.qpid.dispatch.connector', 'name' : connector_name}
+        props = {'operation': 'READ', 'type': 'io.skupper.router.connector', 'name' : connector_name}
         msg = Message(properties=props, reply_to=self.reply_addr)
         return msg
 
     def make_connector_delete_command(self, connector_name):
-        props = {'operation': 'DELETE', 'type': 'org.apache.qpid.dispatch.connector', 'name' : connector_name}
+        props = {'operation': 'DELETE', 'type': 'io.skupper.router.connector', 'name' : connector_name}
         msg = Message(properties=props, reply_to=self.reply_addr)
         return msg
 
@@ -695,7 +695,7 @@ class RouterFluxTest(TestCase):
         # immediately rather than waiting for the remoteLsMaxAgeSeconds timeout
 
         mgmt = INT_C.management
-        a_type = 'org.apache.qpid.dispatch.router.address'
+        a_type = 'io.skupper.router.router.address'
         rsp = mgmt.query(a_type).get_dicts()
         while any('closest/on_A' in a['name'] for a in rsp):
             time.sleep(0.25)
@@ -730,7 +730,7 @@ class RouterFluxTest(TestCase):
         # wait for INT_A mobile addresses to be removed from INT_C, this
         # should happen after ra_stale seconds
         mgmt = INT_C.management
-        a_type = 'org.apache.qpid.dispatch.router.address'
+        a_type = 'io.skupper.router.router.address'
         rsp = mgmt.query(a_type).get_dicts()
         while any('closest/on_A' in a['name'] for a in rsp):
             time.sleep(0.25)

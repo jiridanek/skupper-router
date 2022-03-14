@@ -56,7 +56,7 @@ class ManagementMessageHelper:
     def make_router_link_query(self) :
         props = {'count':      '100',
                  'operation':  'QUERY',
-                 'entityType': 'org.apache.qpid.dispatch.router.link',
+                 'entityType': 'io.skupper.router.router.link',
                  'name':       'self',
                  'type':       'org.amqp.management'
                  }

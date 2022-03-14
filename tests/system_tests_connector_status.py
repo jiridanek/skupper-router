@@ -101,7 +101,7 @@ class ConnectorStatusTest(TestCase):
 
     def check_B_connector(self):
         # Router A should now try to connect to Router B again since we killed Router C.
-        long_type = 'org.apache.qpid.dispatch.connector'
+        long_type = 'io.skupper.router.connector'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command, address=self.address()))
 
@@ -117,7 +117,7 @@ class ConnectorStatusTest(TestCase):
         # The routers have connected and begun talking to each other
         # Verify that the connectionStatus field of the connector is set to SUCCESS.
         # Also make sure that the connectionMsg field of the connector has "Connection opened" in it.
-        long_type = 'org.apache.qpid.dispatch.connector'
+        long_type = 'io.skupper.router.connector'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
         connection_msg = output[0]['connectionMsg']

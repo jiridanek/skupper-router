@@ -1174,7 +1174,7 @@ class TcpAdaptorManagementTest(TestCase):
         cls.e_router.wait_ready()
 
     def _query_links_by_addr(self, router_mgmt, owning_addr):
-        oid = 'org.apache.qpid.dispatch.router.link'
+        oid = 'io.skupper.router.router.link'
         attrs = ['owningAddr', 'linkDir']
 
         links = []
@@ -1190,8 +1190,8 @@ class TcpAdaptorManagementTest(TestCase):
         Create and delete TCP connectors and listeners. Ensure that the service
         address is properly removed on the interior router.
         """
-        LISTENER_TYPE = 'org.apache.qpid.dispatch.tcpListener'
-        CONNECTOR_TYPE = 'org.apache.qpid.dispatch.tcpConnector'
+        LISTENER_TYPE = 'io.skupper.router.tcpListener'
+        CONNECTOR_TYPE = 'io.skupper.router.tcpConnector'
 
         mgmt = self.e_router.management
 

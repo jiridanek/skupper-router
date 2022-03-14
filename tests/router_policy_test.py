@@ -30,7 +30,7 @@ from system_test import unittest
 from system_test import TestCase, main_module
 
 if TYPE_CHECKING:
-    from qpid_dispatch_internal.policy.policy_local import AppStats
+    from skupper_router_internal.policy.policy_local import AppStats
 
 
 class PolicyHostAddrTest(TestCase):

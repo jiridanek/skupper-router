@@ -94,7 +94,7 @@ const char *qdr_connection_columns[] =
      "enableProtocolTrace",
      0};
 
-const char *CONNECTION_TYPE = "org.apache.qpid.dispatch.connection";
+const char *CONNECTION_TYPE = "io.skupper.router.connection";
 
 static void qd_get_next_pn_data(pn_data_t **data, const char **d, int *d1)
 {

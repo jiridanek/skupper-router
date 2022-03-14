@@ -32,7 +32,7 @@ from system_test import unittest
 from system_test import Logger, TestCase, Process, Qdrouterd, main_module, TIMEOUT, DIR
 from system_test import QdManager
 
-DUMMY = "org.apache.qpid.dispatch.dummy"
+DUMMY = "io.skupper.router.dummy"
 
 CONNECTION_PROPERTIES_UNICODE_STRING = {'connection': 'properties', 'int_property': 6451}
 
@@ -165,7 +165,7 @@ class SkmanageTest(TestCase):
     def test_query(self):
 
         def long_type(name):
-            return 'org.apache.qpid.dispatch.' + name
+            return 'io.skupper.router.' + name
 
         types = ['listener', 'log', 'router']
         long_types = [long_type(name) for name in types]
@@ -214,31 +214,31 @@ class SkmanageTest(TestCase):
     def test_get_operations(self):
         out = json.loads(self.run_skmanage("get-operations"))
         self.assertEqual(len(out), TOTAL_ENTITIES)
-        self.assertEqual(out['org.apache.qpid.dispatch.sslProfile'], ['CREATE', 'DELETE', 'READ'])
+        self.assertEqual(out['io.skupper.router.sslProfile'], ['CREATE', 'DELETE', 'READ'])
 
     def test_get_types_with_ssl_profile_type(self):
-        out = json.loads(self.run_skmanage("get-types --type=org.apache.qpid.dispatch.sslProfile"))
-        self.assertEqual(out['org.apache.qpid.dispatch.sslProfile'], ['org.apache.qpid.dispatch.configurationEntity', 'org.apache.qpid.dispatch.entity'])
+        out = json.loads(self.run_skmanage("get-types --type=io.skupper.router.sslProfile"))
+        self.assertEqual(out['io.skupper.router.sslProfile'], ['io.skupper.router.configurationEntity', 'io.skupper.router.entity'])
 
     def test_get_ssl_profile_type_attributes(self):
-        out = json.loads(self.run_skmanage('get-attributes --type=org.apache.qpid.dispatch.sslProfile'))
+        out = json.loads(self.run_skmanage('get-attributes --type=io.skupper.router.sslProfile'))
         self.assertEqual(len(out), 1)
-        self.assertEqual(len(out['org.apache.qpid.dispatch.sslProfile']), 11)
+        self.assertEqual(len(out['io.skupper.router.sslProfile']), 11)
 
     def test_get_ssl_profile_attributes(self):
-        out = json.loads(self.run_skmanage('get-attributes org.apache.qpid.dispatch.sslProfile'))
+        out = json.loads(self.run_skmanage('get-attributes io.skupper.router.sslProfile'))
         self.assertEqual(len(out), 1)
-        self.assertEqual(len(out['org.apache.qpid.dispatch.sslProfile']), 11)
+        self.assertEqual(len(out['io.skupper.router.sslProfile']), 11)
 
     def test_get_ssl_profile_type_operations(self):
-        out = json.loads(self.run_skmanage('get-operations --type=org.apache.qpid.dispatch.sslProfile'))
+        out = json.loads(self.run_skmanage('get-operations --type=io.skupper.router.sslProfile'))
         self.assertEqual(len(out), 1)
-        self.assertEqual(len(out['org.apache.qpid.dispatch.sslProfile']), 3)
+        self.assertEqual(len(out['io.skupper.router.sslProfile']), 3)
 
     def test_get_ssl_profile_operations(self):
-        out = json.loads(self.run_skmanage('get-operations org.apache.qpid.dispatch.sslProfile'))
+        out = json.loads(self.run_skmanage('get-operations io.skupper.router.sslProfile'))
         self.assertEqual(len(out), 1)
-        self.assertEqual(len(out['org.apache.qpid.dispatch.sslProfile']), 3)
+        self.assertEqual(len(out['io.skupper.router.sslProfile']), 3)
 
     def test_get_log(self):
         logs = json.loads(self.run_skmanage("get-log limit=20"))
@@ -283,14 +283,14 @@ class SkmanageTest(TestCase):
         exception = False
         try:
             # Try to not set 'output'
-            json.loads(self.run_skmanage("UPDATE --type org.apache.qpid.dispatch.log --name log/DEFAULT outputFile="))
+            json.loads(self.run_skmanage("UPDATE --type io.skupper.router.log --name log/DEFAULT outputFile="))
         except Exception as e:
             exception = True
             self.assertTrue("InternalServerErrorStatus: CError: Configuration: Failed to open log file ''" in str(e))
         self.assertTrue(exception)
 
         # Set a valid 'output'
-        output = json.loads(self.run_skmanage("UPDATE --type org.apache.qpid.dispatch.log --name log/DEFAULT "
+        output = json.loads(self.run_skmanage("UPDATE --type io.skupper.router.log --name log/DEFAULT "
                                               "enable=trace+ outputFile=A.log"))
         self.assertEqual("A.log", output['outputFile'])
         self.assertEqual("trace+", output['enable'])
@@ -301,7 +301,7 @@ class SkmanageTest(TestCase):
         return connector
 
     def test_check_address_name(self):
-        long_type = 'org.apache.qpid.dispatch.router.config.address'
+        long_type = 'io.skupper.router.router.config.address'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
         self.assertEqual(len(output), 2)
@@ -315,13 +315,13 @@ class SkmanageTest(TestCase):
         self.assertNotIn('prefix', output[1])
 
     def test_create_address(self):
-        long_type = 'org.apache.qpid.dispatch.router.config.address'
+        long_type = 'io.skupper.router.router.config.address'
         create_command = 'CREATE --type=' + long_type + ' pattern="a.b.#"'
         output = json.loads(self.run_skmanage(create_command))
         self.assertEqual(output['pattern'], '"a.b.#"')
 
     def test_check_auto_link_name(self):
-        long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
+        long_type = 'io.skupper.router.router.config.autoLink'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
         self.assertEqual(output[0]['name'], "test-auto-link")
@@ -329,13 +329,13 @@ class SkmanageTest(TestCase):
         self.assertEqual(output[0]['addr'], "mnop")
 
     def test_specify_container_id_connection_auto_link(self):
-        long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
+        long_type = 'io.skupper.router.router.config.autoLink'
         create_command = 'CREATE --type=' + long_type + ' address=abc containerId=id1 connection=conn1 direction=out'
         output = self.run_skmanage(create_command, expect=Process.EXIT_FAIL)
         self.assertIn("Both connection and containerId cannot be specified", output)
 
     def test_create_delete_connector(self):
-        long_type = 'org.apache.qpid.dispatch.connector'
+        long_type = 'io.skupper.router.connector'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
         name = output[0]['name']
@@ -376,7 +376,7 @@ class SkmanageTest(TestCase):
         self.assertEqual("normal", output['role'])
 
     def test_zzz_create_delete_listener(self):
-        long_type = 'org.apache.qpid.dispatch.listener'
+        long_type = 'io.skupper.router.listener'
         name = 'ealistener'
 
         listener_port = self.get_port()
@@ -444,7 +444,7 @@ class SkmanageTest(TestCase):
                   ('*/mars/*/#', 'multicast'),
                   ('*.mercury', 'closest'),
                   ('*/#/pluto', 'multicast')]
-        long_type = 'org.apache.qpid.dispatch.router.config.address'
+        long_type = 'io.skupper.router.router.config.address'
 
         # add patterns:
         pcount = 0
@@ -509,7 +509,7 @@ class SkmanageTest(TestCase):
         # Try fetching all 10,000 addresses
         # This skmanage query command would fail without the fix
         # for DISPATCH-974
-        query_command = 'QUERY --type=org.apache.qpid.dispatch.router.address'
+        query_command = 'QUERY --type=io.skupper.router.router.address'
         for i in range(3):
             sender_addresses = 0
             receiver_addresses = 0
@@ -559,9 +559,9 @@ class SkmanageTest(TestCase):
         self.assertEqual(in_links, COUNT)
 
     def test_worker_threads(self):
-        long_type = 'org.apache.qpid.dispatch.router'
+        long_type = 'io.skupper.router.router'
         qd_manager = QdManager(address=self.address())
-        output = qd_manager.query('org.apache.qpid.dispatch.router')
+        output = qd_manager.query('io.skupper.router.router')
         self.assertEqual(output[0]['workerThreads'], 4)
 
     def test_check_memory_usage(self):
@@ -569,7 +569,7 @@ class SkmanageTest(TestCase):
         Verify that the process memory usage is present. Non-Linux platforms
         may return zero, so accept that as a valid value.
         """
-        long_type = 'org.apache.qpid.dispatch.router'
+        long_type = 'io.skupper.router.router'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
         self.assertEqual(len(output), 1)
@@ -588,7 +588,7 @@ class SkmanageTest(TestCase):
         """Verify skmanage can securely connect via SSL"""
         ssl_address = "amqps://localhost:%s" % self.secure_port
         ssl_user_address = "amqps://localhost:%s" % self.secure_user_port
-        query = 'QUERY --type org.apache.qpid.dispatch.router'
+        query = 'QUERY --type io.skupper.router.router'
 
         # this should fail: no trustfile
         with self.assertRaises(RuntimeError,

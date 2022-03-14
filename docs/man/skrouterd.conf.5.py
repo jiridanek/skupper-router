@@ -30,8 +30,8 @@ import sys
 from skupper_router_internal.management.qdrouter import QdSchema
 from skupper_router_internal.management.schema_doc import SchemaWriter
 
-CONNECTOR = 'org.apache.qpid.dispatch.connector'
-LISTENER = 'org.apache.qpid.dispatch.listener'
+CONNECTOR = 'io.skupper.router.connector'
+LISTENER = 'io.skupper.router.listener'
 
 # avoid writing these config entity types to the man file, they are not allowed
 # in the configuration file and are only supported at run time via management

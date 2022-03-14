@@ -116,7 +116,7 @@ class TwoRouterTest(TestCase):
         self.assertIsNone(test.error)
 
         local_node = Node.connect(self.routers[0].addresses[0], timeout=TIMEOUT)
-        outs = local_node.query(type='org.apache.qpid.dispatch.router')
+        outs = local_node.query(type='io.skupper.router.router')
 
         # deliveriesTransit must most surely be greater than num_msgs
         pos = outs.attribute_names.index("deliveriesTransit")
@@ -461,7 +461,7 @@ class DeleteConnectionWithReceiver(MessagingHandler):
             request = Message()
             request.address = "amqp:/_local/$management"
             request.properties = {
-                'type': 'org.apache.qpid.dispatch.connection',
+                'type': 'io.skupper.router.connection',
                 'operation': 'QUERY'}
             request.reply_to = self.mgmt_receiver.remote_source.address
             self.mgmt_sender.send(request)
@@ -470,7 +470,7 @@ class DeleteConnectionWithReceiver(MessagingHandler):
     def poll_timeout(self):
         request = Message()
         request.address = "amqp:/_local/$management"
-        request.properties = {'type': 'org.apache.qpid.dispatch.connection',
+        request.properties = {'type': 'io.skupper.router.connection',
                               'operation': 'QUERY'}
         request.reply_to = self.mgmt_receiver_2.remote_source.address
         self.mgmt_sender.send(request)
@@ -493,7 +493,7 @@ class DeleteConnectionWithReceiver(MessagingHandler):
                             request.address = "amqp:/_local/$management"
                             request.properties = {
                                 'identity': identity,
-                                'type': 'org.apache.qpid.dispatch.connection',
+                                'type': 'io.skupper.router.connection',
                                 'operation': 'UPDATE'
                             }
                             request.body = {
@@ -1478,7 +1478,7 @@ class CustomTimeout:
     def on_timer_task(self, event):
         local_node = Node.connect(self.parent.address1, timeout=TIMEOUT)
 
-        res = local_node.query('org.apache.qpid.dispatch.router.address')
+        res = local_node.query('io.skupper.router.router.address')
         name = res.attribute_names.index('name')
         found = False
         for results in res.results:
@@ -1840,7 +1840,7 @@ class TwoRouterConnection(TestCase):
         return False
 
     def check_connections(self):
-        res = self.local_node.query(type='org.apache.qpid.dispatch.connection')
+        res = self.local_node.query(type='io.skupper.router.connection')
         results = res.results
 
         # If DISPATCH-1093 was not fixed, there would be an additional
@@ -1864,12 +1864,12 @@ class TwoRouterConnection(TestCase):
         self.local_node = Node.connect(self.routers[0].addresses[0],
                                        timeout=TIMEOUT)
 
-        res = self.local_node.query(type='org.apache.qpid.dispatch.connection')
+        res = self.local_node.query(type='io.skupper.router.connection')
         results = res.results
 
         self.assertEqual(1, len(results))
 
-        long_type = 'org.apache.qpid.dispatch.connector' ''
+        long_type = 'io.skupper.router.connector' ''
 
         create_command = 'CREATE --type=' + long_type + ' --name=foo' + ' host=0.0.0.0 port=' + str(TwoRouterConnection.B_normal_port_1)
 

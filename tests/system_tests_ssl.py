@@ -747,7 +747,7 @@ class RouterTestSslInterRouter(RouterTestSslBase):
 
         url = Url("amqp://0.0.0.0:%d/$management" % self.PORT_NO_SSL)
         node = Node.connect(url)
-        response = node.query(type="org.apache.qpid.dispatch.router.node", attribute_names=["id"])
+        response = node.query(type="io.skupper.router.router.node", attribute_names=["id"])
         router_nodes = []
         for resp in response.get_dicts():
             router_nodes.append(resp['id'])
@@ -899,7 +899,7 @@ class RouterTestSslInterRouterWithInvalidPathToCA(RouterTestSslBase):
 
         url = Url("amqp://0.0.0.0:%d/$management" % self.PORT_NO_SSL)
         node = Node.connect(url)
-        response = node.query(type="org.apache.qpid.dispatch.router.node", attribute_names=["id"])
+        response = node.query(type="io.skupper.router.router.node", attribute_names=["id"])
         router_nodes = []
         for resp in response.get_dicts():
             router_nodes.append(resp['id'])
@@ -1052,7 +1052,7 @@ class RouterTestSslInterRouterWithoutHostnameVerificationAndMismatchedCA(RouterT
 
         url = Url("amqp://0.0.0.0:%d/$management" % self.PORT_NO_SSL)
         node = Node.connect(url)
-        response = node.query(type="org.apache.qpid.dispatch.router.node", attribute_names=["id"])
+        response = node.query(type="io.skupper.router.router.node", attribute_names=["id"])
         router_nodes = []
         for resp in response.get_dicts():
             router_nodes.append(resp['id'])

@@ -114,8 +114,8 @@ class NameCollisionTest(TestCase):
     def test_name_collision(self):
         args = {"name": "autoLink", "address": "autoLink1", "connection": "broker", "direction": "in"}
         # Add autoLink with the same name as the one already present.
-        al_long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
-        addr_long_type = 'org.apache.qpid.dispatch.router.config.address'
+        al_long_type = 'io.skupper.router.router.config.autoLink'
+        addr_long_type = 'io.skupper.router.router.config.address'
         mgmt = QdManager(address=self.router.addresses[0])
         test_pass = False
         try:
@@ -216,7 +216,7 @@ class AutoLinkRetryTest(TestCase):
         return self.routers[1].addresses[0]
 
     def check_auto_link(self):
-        long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
+        long_type = 'io.skupper.router.router.config.autoLink'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
 
@@ -254,7 +254,7 @@ class AutoLinkRetryTest(TestCase):
                 Timer(self.timer_delay, self.check_auto_link).start()
 
     def test_auto_link_reattch(self):
-        long_type = 'org.apache.qpid.dispatch.router.config.autoLink'
+        long_type = 'io.skupper.router.router.config.autoLink'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
 
@@ -373,7 +373,7 @@ class AutolinkTest(TestCase):
         test.run()
         self.assertIsNone(test.error)
 
-        long_type = 'org.apache.qpid.dispatch.router'
+        long_type = 'io.skupper.router.router'
         query_command = 'QUERY --type=' + long_type
         output = json.loads(self.run_skmanage(query_command))
         self.assertEqual(output[0]['deliveriesEgressRouteContainer'], 275)
@@ -746,7 +746,7 @@ class ManageAutolinksTest(MessagingHandler):
         if self.n_created < self.count:
             while self.n_created < self.count and self.agent.credit > 0:
                 props = {'operation': 'CREATE',
-                         'type': 'org.apache.qpid.dispatch.router.config.autoLink',
+                         'type': 'io.skupper.router.router.config.autoLink',
                          'name': 'AL.%d' % self.n_created}
                 body  = {'direction': 'out',
                          'containerId': 'container.new',
@@ -757,7 +757,7 @@ class ManageAutolinksTest(MessagingHandler):
         elif self.n_attached == self.count and self.n_deleted < self.count:
             while self.n_deleted < self.count and self.agent.credit > 0:
                 props = {'operation': 'DELETE',
-                         'type': 'org.apache.qpid.dispatch.router.config.autoLink',
+                         'type': 'io.skupper.router.router.config.autoLink',
                          'name': 'AL.%d' % self.n_deleted}
                 body  = {}
                 msg = Message(properties=props, body=body, reply_to=self.reply_to)

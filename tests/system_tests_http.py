@@ -138,7 +138,7 @@ class RouterTestHttp(TestCase):
         # are working.
 
         # Delete the listener on port http_delete_listen_port_1
-        long_type = 'org.apache.qpid.dispatch.listener'
+        long_type = 'io.skupper.router.listener'
         mgmt = QdManager(address=address())
 
         if self.skip_delete_http_listener_test:
@@ -337,7 +337,7 @@ class RouterTestHttp(TestCase):
 
         if not self.skip_delete_http_listener_test:
             # Delete the listener with name 'delete-me'
-            long_type = 'org.apache.qpid.dispatch.listener'
+            long_type = 'io.skupper.router.listener'
             mgmt = QdManager(address=address())
             mgmt.delete(long_type, name=name)
 

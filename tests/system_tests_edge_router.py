@@ -1374,7 +1374,7 @@ class RouterTest(TestCase):
         mgmt = QdManager(address=self.routers[0].addresses[0],
                          edge_router_id='EA1')
         conn_found = False
-        outs = mgmt.query('org.apache.qpid.dispatch.connection')
+        outs = mgmt.query('io.skupper.router.connection')
         for out in outs:
             if out['container'] == 'INT.A' and out['dir'] == "out" and out['role'] == "edge":
                 conn_found = True
@@ -1386,7 +1386,7 @@ class RouterTest(TestCase):
         mgmt = QdManager(address=self.routers[2].addresses[0],
                          edge_router_id='EA1')
         conn_found = False
-        outs = mgmt.query('org.apache.qpid.dispatch.connection')
+        outs = mgmt.query('io.skupper.router.connection')
 
         for out in outs:
             if out['container'] == 'INT.A' and out['dir'] == "out" and out['role'] == "edge":
@@ -1401,7 +1401,7 @@ class RouterTest(TestCase):
         mgmt = QdManager(address=self.routers[1].addresses[0],
                          edge_router_id='EA1')
         conn_found = False
-        outs = mgmt.query('org.apache.qpid.dispatch.connection')
+        outs = mgmt.query('io.skupper.router.connection')
 
         for out in outs:
             if out['container'] == 'INT.A' and out['dir'] == "out" and out['role'] == "edge":
@@ -1462,7 +1462,7 @@ class RouterTest(TestCase):
         # uplink to INT.A) and query for connections on INT.A
         mgmt = QdManager(address=self.routers[2].addresses[0],
                          router_id='INT.A')
-        outs = mgmt.query('org.apache.qpid.dispatch.connection')
+        outs = mgmt.query('io.skupper.router.connection')
         ea1_conn_found = False
         ea2_conn_found = False
         int_b_inter_router_conn_found = False
@@ -1482,7 +1482,7 @@ class RouterTest(TestCase):
         # uplink to INT.A) and query for connections on INT.B
         mgmt = QdManager(address=self.routers[2].addresses[0],
                          router_id='INT.B')
-        outs = mgmt.query('org.apache.qpid.dispatch.connection')
+        outs = mgmt.query('io.skupper.router.connection')
         eb1_conn_found = False
         eb2_conn_found = False
         int_a_inter_router_conn_found = False
@@ -2281,7 +2281,7 @@ class MobileAddressEventTest(MessagingHandler):
 
     def check_address(self):
         local_node = Node.connect(self.interior_host, timeout=TIMEOUT)
-        outs = local_node.query(type='org.apache.qpid.dispatch.router.address')
+        outs = local_node.query(type='io.skupper.router.router.address')
         remote_count = outs.attribute_names.index("remoteCount")
         subs_count = outs.attribute_names.index("subscriberCount")
         found = False
@@ -2526,7 +2526,7 @@ class StreamingMessageTest(TestCase):
 
     def _get_address(self, router, address):
         """Lookup address in route table"""
-        a_type = 'org.apache.qpid.dispatch.router.address'
+        a_type = 'io.skupper.router.router.address'
         addrs = router.management.query(a_type).get_dicts()
         return [a for a in addrs if address in a['name']]
 
