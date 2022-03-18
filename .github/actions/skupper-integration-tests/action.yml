@@ -91,7 +91,7 @@ runs:
           export PUBLIC_1_INGRESS_HOST=10.0.1.1
           export QDROUTERD_IMAGE=localhost:32000/skupper-router:registry
 
-          go test -count=1 -timeout=60m -tags=integration -v ./test/integration/...
+          go test -tags=integration -timeout=60m -v ./test/integration/...
         working-directory: skupper
         shell: bash
 
