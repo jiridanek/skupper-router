@@ -39,7 +39,7 @@ jobs:
       - name: run tests (skupper integration tests)
         uses: ./.github/actions/skupper-integration-tests
         with:
-          qdrouterdImage: "${{ steps.image-build.outputs.image-tag  }}"
+          qdrouterdImage: "${{ steps.image-build.outputs.image-tag }}"
 
       - name: publish the main image
         if: ${{ github.ref == 'refs/heads/main' }}

@@ -29,7 +29,7 @@ inputs:
   skupperGitRef:
     required: false
     description: Reference to skupper version
-    default: "0.8.7"
+    default: "eb57be7a6bee6a23b02c842f9b35fdce71394a96"
 
 runs:
   using: "composite"
