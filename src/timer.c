@@ -26,6 +26,7 @@
 #include "qpid/dispatch/alloc.h"
 #include "qpid/dispatch/ctools.h"
 #include "qpid/dispatch/atomic.h"
+#include "qpid/dispatch/threading.h"
 
 #include <proton/proactor.h>
 
@@ -65,7 +66,7 @@ struct qd_timer_t {
     qd_server_t      *server;
     qd_timer_cb_t     handler;
     void             *context;
-    sys_cond_t       *condition;
+    sys_cond_t        condition;
     sys_atomic_t      ref_count; // referenced by user and when on scheduled list
     qd_timestamp_t    delta_time;
     qd_timer_state_t  state;
@@ -73,7 +74,7 @@ struct qd_timer_t {
 
 DEQ_DECLARE(qd_timer_t, qd_timer_list_t);
 
-static sys_mutex_t     *lock = NULL;
+static sys_mutex_t      lock = 1;  // todo
 static qd_timer_list_t  scheduled_timers = {0};
 
 // thread currently running timer callbacks or 0 if callbacks are not running
@@ -88,7 +89,7 @@ ALLOC_DECLARE(qd_timer_t);
 ALLOC_DEFINE(qd_timer_t);
 
 /// For tests only
-sys_mutex_t* qd_timer_lock() { return lock; }
+sys_mutex_t  qd_timer_lock() { return lock; }
 
 //=========================================================================
 // Private static functions
@@ -134,7 +135,7 @@ static void timer_decref_LH(qd_timer_t *timer)
     assert(sys_atomic_get(&timer->ref_count) > 0);
     if (sys_atomic_dec(&timer->ref_count) == 1) {
         assert(timer->state != QD_TIMER_STATE_SCHEDULED);
-        sys_cond_free(timer->condition);
+        sys_cond_free(&timer->condition);
         sys_atomic_destroy(&timer->ref_count);
         free_qd_timer_t(timer);
     }
@@ -152,19 +153,13 @@ qd_timer_t *qd_timer(qd_dispatch_t *qd, qd_timer_cb_t cb, void* context)
     if (!timer)
         return 0;
 
-    sys_cond_t *cond = sys_cond();
-    if (!cond) {
-        free_qd_timer_t(timer);
-        return 0;
-    }
-
     DEQ_ITEM_INIT(timer);
 
     timer->server     = qd ? qd->server : 0;
     timer->handler    = cb;
     timer->context    = context;
     timer->delta_time = 0;
-    timer->condition  = cond;
+    sys_cond(&timer->condition);
     timer->state      = QD_TIMER_STATE_IDLE;
     sys_atomic_init(&timer->ref_count, 1);
 
@@ -176,7 +171,7 @@ void qd_timer_free(qd_timer_t *timer)
 {
     if (!timer) return;
 
-    sys_mutex_lock(lock);
+    sys_mutex_lock(&lock);
 
     assert(timer->state != QD_TIMER_STATE_DELETED);  // double free!!!
 
@@ -185,7 +180,7 @@ void qd_timer_free(qd_timer_t *timer)
             // Another thread is running the callback (see qd_timer_visit())
             // Wait until the callback finishes
             timer->state = QD_TIMER_STATE_BLOCKED;
-            sys_cond_wait(timer->condition, lock);
+            sys_cond_wait(&timer->condition, &lock);
         }
     }
 
@@ -199,7 +194,7 @@ void qd_timer_free(qd_timer_t *timer)
 
     timer->state = QD_TIMER_STATE_DELETED;
     timer_decref_LH(timer);  // now drop caller ref_count
-    sys_mutex_unlock(lock);
+    sys_mutex_unlock(&lock);
 }
 
 
@@ -211,7 +206,7 @@ qd_timestamp_t qd_timer_now()
 
 void qd_timer_schedule(qd_timer_t *timer, qd_duration_t duration)
 {
-    sys_mutex_lock(lock);
+    sys_mutex_lock(&lock);
 
     assert(timer->state != QD_TIMER_STATE_DELETED);
     const bool was_scheduled = timer_cancel_LH(timer);
@@ -254,18 +249,18 @@ void qd_timer_schedule(qd_timer_t *timer, qd_duration_t duration)
     if (!callback_thread) {
         qd_server_timeout(first->server, first->delta_time);
     }
-    sys_mutex_unlock(lock);
+    sys_mutex_unlock(&lock);
 }
 
 
 void qd_timer_cancel(qd_timer_t *timer)
 {
-    sys_mutex_lock(lock);
+    sys_mutex_lock(&lock);
 
     if (timer->state == QD_TIMER_STATE_RUNNING) {
         assert(sys_thread_self() != callback_thread);  // cancel within callback not allowed
         timer->state = QD_TIMER_STATE_BLOCKED;
-        sys_cond_wait(timer->condition, lock);
+        sys_cond_wait(&timer->condition, &lock);
     }
 
     // timer may have been resheduled before wait returns
@@ -274,7 +269,7 @@ void qd_timer_cancel(qd_timer_t *timer)
     if (need_decref)  // was on scheduled list
         timer_decref_LH(timer);
 
-    sys_mutex_unlock(lock);
+    sys_mutex_unlock(&lock);
 }
 
 
@@ -285,7 +280,7 @@ void qd_timer_cancel(qd_timer_t *timer)
 
 void qd_timer_initialize()
 {
-    lock = sys_mutex();
+    sys_mutex(&lock);
     DEQ_INIT(scheduled_timers);
     time_base = 0;
 }
@@ -293,7 +288,7 @@ void qd_timer_initialize()
 
 void qd_timer_finalize(void)
 {
-    sys_mutex_free(lock);
+    sys_mutex_free(&lock);
     lock = 0;
 }
 
@@ -301,7 +296,7 @@ void qd_timer_finalize(void)
 /* Execute all timers that are ready and set up next timeout. */
 void qd_timer_visit()
 {
-    sys_mutex_lock(lock);
+    sys_mutex_lock(&lock);
     callback_thread = sys_thread_self();
     timer_adjust_now_LH();
     qd_timer_t *timer = DEQ_HEAD(scheduled_timers);
@@ -311,7 +306,7 @@ void qd_timer_visit()
         // note: still holding scheduled_timers refcount
         timer_cancel_LH(timer);
         timer->state = QD_TIMER_STATE_RUNNING;
-        sys_mutex_unlock(lock);
+        sys_mutex_unlock(&lock);
 
         /* The callback may reschedule or delete the timer while the lock is
          * dropped.  Attempting to delete the timer now will cause the caller to
@@ -319,9 +314,9 @@ void qd_timer_visit()
          */
         timer->handler(timer->context);
 
-        sys_mutex_lock(lock);
+        sys_mutex_lock(&lock);
         if (timer->state == QD_TIMER_STATE_BLOCKED) {
-            sys_cond_signal(timer->condition);
+            sys_cond_signal(&timer->condition);
             // expect blocked caller sets timer->state
         } else if (timer->state == QD_TIMER_STATE_RUNNING) {
             timer->state = QD_TIMER_STATE_IDLE;
@@ -336,5 +331,5 @@ void qd_timer_visit()
         qd_server_timeout(first->server, first->delta_time);
     }
     callback_thread = 0;
-    sys_mutex_unlock(lock);
+    sys_mutex_unlock(&lock);
 }

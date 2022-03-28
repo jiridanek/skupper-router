@@ -28,41 +28,96 @@
 #include "qpid/dispatch/ctools.h"
 
 #include <assert.h>
+#include <errno.h>
+#include <inttypes.h>
+#include <linux/futex.h>
 #include <pthread.h>
+#include <stdatomic.h>
+#include <syscall.h>
+#include <unistd.h>
 
-struct sys_mutex_t {
-    pthread_mutex_t mutex;
-};
+// https://lwn.net/Articles/823513/
 
+// can have spurious wakeup?
 
-sys_mutex_t *sys_mutex(void)
+static long futex(uint32_t *uaddr, int futex_op, uint32_t val,
+      const struct timespec *timeout, uint32_t *uaddr2, uint32_t val3)
 {
-    sys_mutex_t *mutex = 0;
-    NEW_CACHE_ALIGNED(sys_mutex_t, mutex);
-    assert(mutex != 0);
-    pthread_mutex_init(&(mutex->mutex), 0);
-    return mutex;
+    return syscall(SYS_futex, uaddr, futex_op, val,
+                   timeout, uaddr2, val3);
+}
+
+/* Acquire the futex pointed to by 'futexp': wait for its value to
+   become 1, and then set the value to 0. */
+
+static void
+fwait(uint32_t *futexp)
+{
+    long s;
+
+    /* atomic_compare_exchange_strong(ptr, oldval, newval)
+       atomically performs the equivalent of:
+
+           if (*ptr == *oldval)
+               *ptr = newval;
+
+       It returns true if the test yielded true and *ptr was updated. */
+
+    while (1) {
+
+        /* Is the futex available? */
+        const uint32_t one = 1;
+        if (atomic_compare_exchange_strong(futexp, &one, 0))
+            break;      /* Yes */
+
+        /* Futex is not available; wait. */
+
+        s = futex(futexp, FUTEX_WAIT_PRIVATE, 0, NULL, NULL, 0);
+        assert(s != -1 || errno == EAGAIN);
+    }
+}
+
+
+
+/* Release the futex pointed to by 'futexp': if the futex currently
+   has the value 0, set its value to 1 and the wake any futex waiters,
+   so that if the peer is blocked in fwait(), it can proceed. */
+
+static void fpost(uint32_t *futexp)
+{
+    long s;
+
+    /* atomic_compare_exchange_strong() was described
+       in comments above. */
+
+    const uint32_t zero = 0;
+    if (atomic_compare_exchange_strong(futexp, &zero, 1)) {
+        s = futex(futexp, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
+        assert(s != -1);
+    }
+}
+
+void sys_mutex(sys_mutex_t *mutex)
+{
+    atomic_init(mutex, 1);
 }
 
 
 void sys_mutex_free(sys_mutex_t *mutex)
 {
-    pthread_mutex_destroy(&(mutex->mutex));
-    FREE_CACHE_ALIGNED(mutex);
+    (void) mutex;
 }
 
 
-void sys_mutex_lock(sys_mutex_t *mutex)
+void sys_mutex_lock(sys_mutex_t  *mutex)
 {
-    int result = pthread_mutex_lock(&(mutex->mutex));
-    assert(result == 0);
+    fwait(mutex);
 }
 
 
-void sys_mutex_unlock(sys_mutex_t *mutex)
+void sys_mutex_unlock(sys_mutex_t  *mutex)
 {
-    int result = pthread_mutex_unlock(&(mutex->mutex));
-    assert(result == 0);
+    fpost(mutex);
 }
 
 
@@ -71,40 +126,35 @@ struct sys_cond_t {
 };
 
 
-sys_cond_t *sys_cond(void)
+void sys_cond(sys_cond_t* cond)
 {
-    sys_cond_t *cond = 0;
-    NEW_CACHE_ALIGNED(sys_cond_t, cond);
-    pthread_cond_init(&(cond->cond), 0);
-    return cond;
+    atomic_init(cond, 0);
 }
 
 
 void sys_cond_free(sys_cond_t *cond)
 {
-    pthread_cond_destroy(&(cond->cond));
-    free(cond);
+    (void) cond;
 }
 
 
 void sys_cond_wait(sys_cond_t *cond, sys_mutex_t *held_mutex)
 {
-    int result = pthread_cond_wait(&(cond->cond), &(held_mutex->mutex));
-    assert(result == 0);
+    fpost(held_mutex);
+    fwait(cond);  // can be simplified, do the atomic check first, only then drop lock
+    fwait(held_mutex);
 }
 
 
 void sys_cond_signal(sys_cond_t *cond)
 {
-    int result = pthread_cond_signal(&(cond->cond));
-    assert(result == 0);
+    fpost(cond);
 }
 
 
 void sys_cond_signal_all(sys_cond_t *cond)
 {
-    int result = pthread_cond_broadcast(&(cond->cond));
-    assert(result == 0);
+    abort();
 }
 
 

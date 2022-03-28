@@ -101,9 +101,9 @@ static const char *event_address_my_prefix = "mc/sfe.";
 static       char *event_address_my        = 0;
 static const int   beacon_interval_sec     = 5;
 
-static sys_mutex_t        *lock;
-static sys_mutex_t        *id_lock;
-static sys_cond_t         *condition;
+static sys_mutex_t         lock;
+static sys_mutex_t         id_lock;
+static sys_cond_t          condition;
 static sys_thread_t       *thread;
 static bool                sleeping = false;
 static qd_log_source_t    *log;
@@ -161,11 +161,11 @@ static plog_attribute_data_t* _plog_find_attribute(plog_record_t *record, plog_a
  */
 static void _plog_next_id(plog_identity_t *identity)
 {
-    sys_mutex_lock(id_lock);
+    sys_mutex_lock(&id_lock);
     identity->site_id   = site_id;
     identity->router_id = router_id;
     identity->record_id = next_identity++;
-    sys_mutex_unlock(id_lock);
+    sys_mutex_unlock(&id_lock);
 }
 
 
@@ -479,13 +479,13 @@ static plog_work_t *_plog_work(plog_work_handler_t handler)
  */
 static void _plog_post_work(plog_work_t *work)
 {
-    sys_mutex_lock(lock);
+    sys_mutex_lock(&lock);
     DEQ_INSERT_TAIL(work_list, work);
     bool need_signal = sleeping;
-    sys_mutex_unlock(lock);
+    sys_mutex_unlock(&lock);
 
-    if (need_signal) {
-        sys_cond_signal(condition);
+    if (need_signal) {  // todo
+        sys_cond_signal(&condition);
     }
 }
 
@@ -914,7 +914,7 @@ static void *_plog_thread(void *context)
         //
         // Use the lock only to protect the condition variable and the work lists
         //
-        sys_mutex_lock(lock);
+        sys_mutex_lock(&lock);
         for (;;) {
             if (!DEQ_IS_EMPTY(work_list)) {
                 DEQ_MOVE(work_list, local_work_list);
@@ -932,10 +932,10 @@ static void *_plog_thread(void *context)
             // Block on the condition variable when there is no work to do
             //
             sleeping = true;
-            sys_cond_wait(condition, lock);
+            sys_cond_wait(&condition, &lock);
             sleeping = false;
         }
-        sys_mutex_unlock(lock);
+        sys_mutex_unlock(&lock);
 
         if (do_flush) {
             _plog_flush_TH(core);
@@ -1223,9 +1223,9 @@ static void _plog_init(qdr_core_t *core, void **adaptor_context)
     router_name = qdr_core_dispatch(core)->router_id;
 
     log       = qd_log_source("FLOW_LOG");
-    lock      = sys_mutex();
-    id_lock   = sys_mutex();
-    condition = sys_cond();
+    sys_mutex(&lock);
+    sys_mutex(&id_lock);
+    sys_cond(&condition);
     thread    = sys_thread(_plog_thread, core);
     *adaptor_context = core;
 
@@ -1276,9 +1276,9 @@ static void _plog_final(void *adaptor_context)
     //
     // Free the condition and lock variables
     //
-    sys_cond_free(condition);
-    sys_mutex_free(lock);
-    sys_mutex_free(id_lock);
+    sys_cond_free(&condition);
+    sys_mutex_free(&lock);
+    sys_mutex_free(&id_lock);
 }
 
 

@@ -27,6 +27,6 @@ void qd_timer_finalize(void);
 void qd_timer_visit();
 
 /// For tests only
-sys_mutex_t* qd_timer_lock();
+sys_mutex_t  qd_timer_lock();
 
 #endif

@@ -59,7 +59,7 @@ typedef struct qdr_http2_adaptor_t {
     void                        *callbacks;
     qd_log_source_t             *protocol_log_source; // A log source for the protocol trace
     qdr_http2_connection_list_t  connections;
-    sys_mutex_t                 *lock;  // protects connections, connectors, listener lists
+    sys_mutex_t                  lock;  // protects connections, connectors, listener lists
 } qdr_http2_adaptor_t;
 
 
@@ -188,7 +188,7 @@ qd_http2_buffer_t *qd_http2_buffer_list_append(qd_http2_buffer_list_t *buflist, 
 //
 static void qdr_http2_q2_unblocked_handler(const qd_alloc_safe_ptr_t context)
 {
-    // prevent the conn from being deleted while running:
+    // prevent the conn from being deleted while running: // TODO somehow schedule conn delete action onto proactor?
 	sys_mutex_lock(qd_server_get_activation_lock(http2_adaptor->core->qd->server));
 
     qdr_http2_connection_t *conn = (qdr_http2_connection_t*)qd_alloc_deref_safe_ptr(&context);
@@ -446,9 +446,9 @@ void free_qdr_http2_connection(qdr_http2_connection_t* http_conn, bool on_shutdo
         nghttp2_session_del(http_conn->session);
     }
 
-    sys_mutex_lock(http2_adaptor->lock);
+    sys_mutex_lock(&http2_adaptor->lock);
     DEQ_REMOVE(http2_adaptor->connections, http_conn);
-    sys_mutex_unlock(http2_adaptor->lock);
+    sys_mutex_unlock(&http2_adaptor->lock);
 
     qd_http2_buffer_t *buff = DEQ_HEAD(http_conn->granted_read_buffs);
     while (buff) {
@@ -1442,9 +1442,9 @@ qdr_http2_connection_t *qdr_http_connection_ingress(qd_http_listener_t* listener
     DEQ_INIT(ingress_http_conn->granted_read_buffs);
     ingress_http_conn->data_prd.read_callback = read_data_callback;
 
-    sys_mutex_lock(http2_adaptor->lock);
+    sys_mutex_lock(&http2_adaptor->lock);
     DEQ_INSERT_TAIL(http2_adaptor->connections, ingress_http_conn);
-    sys_mutex_unlock(http2_adaptor->lock);
+    sys_mutex_unlock(&http2_adaptor->lock);
 
     nghttp2_session_server_new(&(ingress_http_conn->session), (nghttp2_session_callbacks*)http2_adaptor->callbacks, ingress_http_conn);
     pn_raw_connection_set_context(ingress_http_conn->pn_raw_conn, ingress_http_conn);
@@ -2430,9 +2430,9 @@ qdr_http2_connection_t *qdr_http_connection_egress(qd_http_connector_t *connecto
     sys_atomic_init(&egress_http_conn->delay_buffer_write, 0);
     sys_atomic_init(&egress_http_conn->q2_restart, 0);
 
-    sys_mutex_lock(http2_adaptor->lock);
+    sys_mutex_lock(&http2_adaptor->lock);
     DEQ_INSERT_TAIL(http2_adaptor->connections, egress_http_conn);
-    sys_mutex_unlock(http2_adaptor->lock);
+    sys_mutex_unlock(&http2_adaptor->lock);
 
     qdr_connection_info_t *info = qdr_connection_info(false, //bool             is_encrypted,
                                                       false, //bool             is_authenticated,
@@ -2622,11 +2622,11 @@ static void handle_listener_event(pn_event_t *e, qd_server_t *qd_server, void *c
                 }
             }
 
-            sys_mutex_lock(http2_adaptor->lock);
+            sys_mutex_lock(&http2_adaptor->lock);
             pn_listener_set_context(li->pn_listener, 0);
             li->pn_listener = 0;
             DEQ_REMOVE(http2_adaptor->listeners, li);
-            sys_mutex_unlock(http2_adaptor->lock);
+            sys_mutex_unlock(&http2_adaptor->lock);
             qd_http_listener_decref(li);
         }
         break;
@@ -2644,9 +2644,9 @@ void qd_http2_delete_connector(qd_dispatch_t *qd, qd_http_connector_t *connector
     if (connector) {
         qd_log(http2_adaptor->log_source, QD_LOG_INFO, "Deleted HttpConnector for %s, %s:%s", connector->config.address, connector->config.host, connector->config.port);
 
-        sys_mutex_lock(http2_adaptor->lock);
+        sys_mutex_lock(&http2_adaptor->lock);
         DEQ_REMOVE(http2_adaptor->connectors, connector);
-        sys_mutex_unlock(http2_adaptor->lock);
+        sys_mutex_unlock(&http2_adaptor->lock);
         //
         // Deleting a connector must delete the corresponding qdr_connection_t and qdr_http2_connection_t objects also.
         //
@@ -2661,13 +2661,13 @@ void qd_http2_delete_connector(qd_dispatch_t *qd, qd_http_connector_t *connector
  */
 void qd_http2_delete_listener(qd_dispatch_t *qd, qd_http_listener_t *li)
 {
-    sys_mutex_lock(http2_adaptor->lock);
+    sys_mutex_lock(&http2_adaptor->lock);
     if (li) {
         if (li->pn_listener) {
             pn_listener_close(li->pn_listener);
         }
     }
-    sys_mutex_unlock(http2_adaptor->lock);
+    sys_mutex_unlock(&http2_adaptor->lock);
 }
 
 
@@ -2740,7 +2740,7 @@ static void qdr_http2_adaptor_final(void *adaptor_context)
         ct = DEQ_HEAD(adaptor->connectors);
     }
 
-    sys_mutex_free(adaptor->lock);
+    sys_mutex_free(&adaptor->lock);
     nghttp2_session_callbacks_del(adaptor->callbacks);
     http2_adaptor =  NULL;
     free(adaptor);
@@ -2777,7 +2777,7 @@ static void qdr_http2_adaptor_init(qdr_core_t *core, void **adaptor_context)
                                             qdr_http_conn_trace);
     adaptor->log_source = qd_log_source(QD_HTTP_LOG_SOURCE);
     adaptor->protocol_log_source = qd_log_source("PROTOCOL");
-    adaptor->lock = sys_mutex();
+    sys_mutex(&adaptor->lock);
     *adaptor_context = adaptor;
     DEQ_INIT(adaptor->listeners);
     DEQ_INIT(adaptor->connectors);

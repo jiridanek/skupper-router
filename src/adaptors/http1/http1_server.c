@@ -248,12 +248,12 @@ qd_http_connector_t *qd_http1_configure_connector(qd_dispatch_t *qd, const qd_ht
         // _core_connection_activate_CT in http1_adaptor.c). This keeps the
         // core from attempting to schedule the connection until we finish
         // setup.
-        sys_mutex_lock(qdr_http1_adaptor->lock);
+        sys_mutex_lock(&qdr_http1_adaptor->lock);
         DEQ_INSERT_TAIL(qdr_http1_adaptor->connections, hconn);
         DEQ_INSERT_TAIL(qdr_http1_adaptor->connectors, c);
         qdr_connection_set_context(hconn->qdr_conn, hconn);
         qd_timer_schedule(hconn->server.reconnect_timer, 0);
-        sys_mutex_unlock(qdr_http1_adaptor->lock);
+        sys_mutex_unlock(&qdr_http1_adaptor->lock);
         // setup complete - core thread can activate the connection
         return c;
     } else {
@@ -274,7 +274,7 @@ void qd_http1_delete_connector(qd_dispatch_t *ignored, qd_http_connector_t *ct)
     if (ct) {
         qd_log(qdr_http1_adaptor->log, QD_LOG_INFO, "Deleted HttpConnector for %s, %s:%s", ct->config.address, ct->config.host, ct->config.port);
 
-        sys_mutex_lock(qdr_http1_adaptor->lock);
+        sys_mutex_lock(&qdr_http1_adaptor->lock);
         DEQ_REMOVE(qdr_http1_adaptor->connectors, ct);
         qdr_http1_connection_t *hconn = (qdr_http1_connection_t*) ct->ctx;
         qdr_connection_t *qdr_conn = 0;
@@ -284,7 +284,7 @@ void qd_http1_delete_connector(qd_dispatch_t *ignored, qd_http_connector_t *ct)
             ct->ctx = 0;
             qdr_conn = hconn->qdr_conn;
         }
-        sys_mutex_unlock(qdr_http1_adaptor->lock);
+        sys_mutex_unlock(&qdr_http1_adaptor->lock);
 
         if (qdr_conn)
             qdr_core_close_connection(qdr_conn);
@@ -427,12 +427,12 @@ static void _do_reconnect(void *context)
     // while timers do not run concurrently it is possible to reschedule them
     // via another thread while the timer handler is running, resulting in this
     // handler running twice
-    sys_mutex_lock(qdr_http1_adaptor->lock);
+    sys_mutex_lock(&qdr_http1_adaptor->lock);
     if (hconn->raw_conn)  {
-        sys_mutex_unlock(qdr_http1_adaptor->lock);
+        sys_mutex_unlock(&qdr_http1_adaptor->lock);
         return;  // already ran
     }
-    sys_mutex_unlock(qdr_http1_adaptor->lock);
+    sys_mutex_unlock(&qdr_http1_adaptor->lock);
 
     // handle any qdr_connection_t processing requests that occurred since
     // this raw connection dropped.
@@ -463,13 +463,13 @@ static void _do_reconnect(void *context)
         if (!_is_request_in_progress((_server_request_t*) DEQ_HEAD(hconn->requests))) {
             qd_log(qdr_http1_adaptor->log, QD_LOG_DEBUG,
                    "[C%"PRIu64"] Connecting to HTTP server...", conn_id);
-            sys_mutex_lock(qdr_http1_adaptor->lock);
+            sys_mutex_lock(&qdr_http1_adaptor->lock);
             hconn->raw_conn = pn_raw_connection();
             pn_raw_connection_set_context(hconn->raw_conn, &hconn->handler_context);
             // this next call may immediately reschedule the connection on another I/O
             // thread. After this call hconn may no longer be valid!
             pn_proactor_raw_connect(qd_server_proactor(hconn->qd_server), hconn->raw_conn, hconn->cfg.host_port);
-            sys_mutex_unlock(qdr_http1_adaptor->lock);
+            sys_mutex_unlock(&qdr_http1_adaptor->lock);
         }
     }
 }
@@ -626,16 +626,16 @@ static void _handle_connection_events(pn_event_t *e, qd_server_t *qd_server, voi
         }
 
         // prevent core activation
-        sys_mutex_lock(qdr_http1_adaptor->lock);
+        sys_mutex_lock(&qdr_http1_adaptor->lock);
         hconn->raw_conn = 0;
         if (reconnect && hconn->server.reconnect_timer) {
             qd_timer_schedule(hconn->server.reconnect_timer, hconn->server.reconnect_pause);
-            sys_mutex_unlock(qdr_http1_adaptor->lock);
+            sys_mutex_unlock(&qdr_http1_adaptor->lock);
             // do not manipulate hconn further as it may now be processed by the
             // timer thread
             return;
         }
-        sys_mutex_unlock(qdr_http1_adaptor->lock);
+        sys_mutex_unlock(&qdr_http1_adaptor->lock);
         break;
     }
     case PN_RAW_CONNECTION_NEED_WRITE_BUFFERS: {
@@ -1743,11 +1743,11 @@ void qdr_http1_server_core_conn_close(qdr_http1_adaptor_t *adaptor,
                                       qdr_http1_connection_t *hconn)
 {
     // prevent activation by core thread
-    sys_mutex_lock(qdr_http1_adaptor->lock);
+    sys_mutex_lock(&qdr_http1_adaptor->lock);
     qdr_connection_t *qdr_conn = hconn->qdr_conn;
     qdr_connection_set_context(hconn->qdr_conn, 0);
     hconn->qdr_conn = 0;
-    sys_mutex_unlock(qdr_http1_adaptor->lock);
+    sys_mutex_unlock(&qdr_http1_adaptor->lock);
     // the core thread can no longer activate this connection
 
     hconn->oper_status = QD_CONN_OPER_DOWN;

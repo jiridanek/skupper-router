@@ -646,7 +646,7 @@ struct qdr_connection_t {
     int                         link_capacity;
     int                         mask_bit;  ///< set only if inter-router connection
     qdr_connection_work_list_t  work_list;
-    sys_mutex_t                *work_lock;
+    sys_mutex_t                 work_lock;
     qdr_link_ref_list_t         links;
     qdr_link_ref_list_t         links_with_work[QDR_N_PRIORITIES];
     qdr_connection_info_t      *connection_info;
@@ -760,12 +760,12 @@ struct qdr_core_t {
 
     qdr_action_list_t  action_list_background;  /// Actions processed only when the action_list is empty
     qdr_action_list_t  action_list;
-    sys_cond_t        *action_cond;
-    sys_mutex_t       *action_lock;
+    sys_cond_t         action_cond;
+    sys_mutex_t        action_lock;
     bool               running;
     bool               sleeping;
 
-    sys_mutex_t             *work_lock;
+    sys_mutex_t              work_lock;
     qdr_core_timer_list_t    scheduled_timers;
     qdr_general_work_list_t  work_list;
     qd_timer_t              *work_timer;
@@ -831,7 +831,7 @@ struct qdr_core_t {
     uint64_t              next_tag;
 
     uint64_t              next_identifier;
-    sys_mutex_t          *id_lock;
+    sys_mutex_t           id_lock;
 
     qdr_forwarder_t      *forwarders[QD_TREATMENT_UNAVAILABLE];
 

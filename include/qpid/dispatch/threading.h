@@ -23,17 +23,19 @@
  * Portable threading and locking API.
  */
 
-typedef struct sys_mutex_t sys_mutex_t;
+#include <stdint.h>
 
-sys_mutex_t *sys_mutex(void);
+typedef uint32_t sys_mutex_t;
+
+void         sys_mutex(sys_mutex_t* mutex);
 void         sys_mutex_free(sys_mutex_t *mutex);
 void         sys_mutex_lock(sys_mutex_t *mutex);
 void         sys_mutex_unlock(sys_mutex_t *mutex);
 
 
-typedef struct sys_cond_t sys_cond_t;
+typedef uint32_t sys_cond_t;
 
-sys_cond_t *sys_cond(void);
+void sys_cond(sys_cond_t *cond);
 void        sys_cond_free(sys_cond_t *cond);
 void        sys_cond_wait(sys_cond_t *cond, sys_mutex_t *held_mutex);
 void        sys_cond_signal(sys_cond_t *cond);

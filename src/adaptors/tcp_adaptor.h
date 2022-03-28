@@ -53,7 +53,7 @@ struct qd_tcp_bridge_t
     char         *site_id;
     char         *host_port; // Generated as "<host>:<port>" for convenience
     // run time statistics updated by connections
-    sys_mutex_t  *stats_lock;
+    sys_mutex_t   stats_lock;
     uint64_t      connections_opened;
     uint64_t      connections_closed;
     uint64_t      bytes_in;
