@@ -66,7 +66,7 @@ fwait(uint32_t *futexp)
     while (1) {
 
         /* Is the futex available? */
-        const uint32_t one = 1;
+        uint32_t one = 1;
         if (atomic_compare_exchange_strong(futexp, &one, 0))
             break;      /* Yes */
 
@@ -90,7 +90,7 @@ static void fpost(uint32_t *futexp)
     /* atomic_compare_exchange_strong() was described
        in comments above. */
 
-    const uint32_t zero = 0;
+    uint32_t zero = 0;
     if (atomic_compare_exchange_strong(futexp, &zero, 1)) {
         s = futex(futexp, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
         assert(s != -1);
@@ -111,8 +111,8 @@ void sys_mutex_free(sys_mutex_t *mutex)
 
 void sys_mutex_lock(sys_mutex_t  *mutex)
 {
-    uint32_t val = atomic_load(mutex);
-    assert(val == 0 || val == 1 || val == 2);
+//    uint32_t val = atomic_load(mutex);
+//    assert(val == 0 || val == 1 || val == 2);
 
     long s;
 
