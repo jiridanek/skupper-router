@@ -1728,7 +1728,7 @@ void qd_connector_decref(qd_connector_t* connector)
 
         qd_server_config_free(&connector->config);
         qd_timer_free(connector->timer);
-        if (connector->lock) sys_mutex_free(&connector->lock);
+        sys_mutex_free(&connector->lock);
 
         qd_failover_item_t *item = DEQ_HEAD(connector->conn_info_list);
         while (item) {

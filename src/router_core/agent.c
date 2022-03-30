@@ -140,8 +140,7 @@ void qdr_agent_free(qdr_agent_t *agent)
 {
     if (agent) {
         qd_timer_free(agent->timer);
-        if (agent->query_lock)
-            sys_mutex_free(&agent->query_lock);
+        sys_mutex_free(&agent->query_lock);
 
         //we can't call qdr_core_unsubscribe on the subscriptions because the action processing thread has
         //already been shut down. But, all the action would have done at this point is free the subscriptions

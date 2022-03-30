@@ -136,13 +136,11 @@ void qd_policy_free(qd_policy_t *policy)
 {
     if (policy->policyDir)
         free(policy->policyDir);
-    if (policy->tree_lock)
-        sys_mutex_free(&policy->tree_lock);
+    sys_mutex_free(&policy->tree_lock);
     hostname_tree_free(policy->hostname_tree);
     Py_XDECREF(module);
     free(policy);
-    if (stats_lock)
-        sys_mutex_free(&stats_lock);
+    sys_mutex_free(&stats_lock);
 }
 
 //

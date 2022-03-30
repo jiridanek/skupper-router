@@ -68,7 +68,6 @@ void qd_entity_cache_free_entries() {
 }
 
 static void push_event(action_t action, const char *type, void *object) {
-    if (!event_lock) return;    /* Unit tests don't call qd_entity_cache_initialize */
     sys_mutex_lock(&event_lock);
     entity_event_t *event = entity_event(action, type, object);
     DEQ_INSERT_TAIL(event_list, event);
@@ -84,7 +83,6 @@ void qd_entity_cache_remove(const char *type, void *object) { push_event(REMOVE,
 // Do not process any entities if return error code != 0
 // Must call qd_entity_refresh_end when done, regardless of error code.
 QD_EXPORT qd_error_t qd_entity_refresh_begin(PyObject *list) {
-    if (!event_lock) return QD_ERROR_NONE;    /* Unit tests don't call qd_entity_cache_initialize */
     qd_error_clear();
     sys_mutex_lock(&event_lock);
     entity_event_t *event = DEQ_HEAD(event_list);

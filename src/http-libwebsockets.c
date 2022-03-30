@@ -225,8 +225,8 @@ struct qd_http_server_t {
 };
 
 static void work_queue_destroy(work_queue_t *wq) {
-    if (wq->lock) sys_mutex_free(&wq->lock);
-    if (wq->cond) sys_cond_free(&wq->cond);
+    sys_mutex_free(&wq->lock);
+    sys_cond_free(&wq->cond);
 }
 
 static void work_queue_init(work_queue_t *wq) {
