@@ -74,7 +74,7 @@ struct qd_timer_t {
 
 DEQ_DECLARE(qd_timer_t, qd_timer_list_t);
 
-static sys_mutex_t      lock = 1;  // todo
+static sys_mutex_t      lock = 0;  // todo
 static qd_timer_list_t  scheduled_timers = {0};
 
 // thread currently running timer callbacks or 0 if callbacks are not running

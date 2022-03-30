@@ -574,9 +574,9 @@ qd_connection_t *qd_server_connection_impl(qd_server_t *server, qd_server_config
     ctx->pn_conn       = pn_connection();
     sys_mutex(&ctx->deferred_call_lock);
     ctx->role = strdup(config->role);
-    if (!ctx->pn_conn || !ctx->deferred_call_lock || !ctx->role) {
+    if (!ctx->pn_conn || !ctx->role) {
         if (ctx->pn_conn) pn_connection_free(ctx->pn_conn);
-        if (ctx->deferred_call_lock) sys_mutex_free(&ctx->deferred_call_lock);
+        sys_mutex_free(&ctx->deferred_call_lock);
         free(ctx->role);
         free_qd_connection_t(ctx);
         return NULL;

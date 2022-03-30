@@ -99,7 +99,7 @@ static void fpost(uint32_t *futexp)
 
 void sys_mutex(sys_mutex_t *mutex)
 {
-    atomic_init(mutex, 1);
+    atomic_init(mutex, 0);
 }
 
 
@@ -111,13 +111,54 @@ void sys_mutex_free(sys_mutex_t *mutex)
 
 void sys_mutex_lock(sys_mutex_t  *mutex)
 {
-    fwait(mutex);
+    assert(*mutex == 0 || *mutex == 1 || *mutex == 2);
+
+    long s;
+
+    /* atomic_compare_exchange_strong(ptr, oldval, newval)
+       atomically performs the equivalent of:
+
+           if (*ptr == *oldval)
+               *ptr = newval;
+
+       It returns true if the test yielded true and *ptr was updated. */
+
+    while (1) {
+        /* Is the futex available? */
+        const uint32_t zero = 0;
+        const uint32_t one = 1;
+
+        if (atomic_compare_exchange_strong(mutex, &zero, 1)) return; /* Yes */
+
+        while(1) {
+            /* Futex is not available; mark contended and wait. */
+            if (atomic_load(mutex) == 2 || atomic_compare_exchange_strong(mutex, &one, 2)) {
+                s = futex(mutex, FUTEX_WAIT_PRIVATE, 2, NULL, NULL, 0);
+                assert(s != -1 || errno == EAGAIN);
+            }
+
+            if (atomic_compare_exchange_strong(mutex, &zero, 2)) {
+                return;
+            }
+        }
+    }
 }
 
 
 void sys_mutex_unlock(sys_mutex_t  *mutex)
 {
-    fpost(mutex);
+    long s;
+
+    /* atomic_compare_exchange_strong() was described
+       in comments above. */
+
+    const uint32_t one = 1;
+    if (atomic_compare_exchange_strong(mutex, &one, 0)) {
+        return;  // uncontended case, nobody was waiting
+    }
+    atomic_store(mutex, 0);
+    s = futex(mutex, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
+    assert(s != -1);
 }
 
 
@@ -140,9 +181,9 @@ void sys_cond_free(sys_cond_t *cond)
 
 void sys_cond_wait(sys_cond_t *cond, sys_mutex_t *held_mutex)
 {
-    fpost(held_mutex);
+    sys_mutex_unlock(held_mutex);
     fwait(cond);  // can be simplified, do the atomic check first, only then drop lock
-    fwait(held_mutex);
+    sys_mutex_lock(held_mutex);
 }
 
 
