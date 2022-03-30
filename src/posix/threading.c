@@ -38,7 +38,9 @@
 
 // https://lwn.net/Articles/823513/
 
-// can have spurious wakeup?
+// can have spurious wakeup? seems like it will wakeup on signal?
+
+// this is code from futex manpage
 
 static long futex(uint32_t *uaddr, int futex_op, uint32_t val,
       const struct timespec *timeout, uint32_t *uaddr2, uint32_t val3)
@@ -73,7 +75,7 @@ fwait(uint32_t *futexp)
         /* Futex is not available; wait. */
 
         s = futex(futexp, FUTEX_WAIT_PRIVATE, 0, NULL, NULL, 0);
-        assert(s != -1 || errno == EAGAIN);
+        assert(s != -1 || errno == EAGAIN || errno == EINTR);
     }
 }
 
@@ -96,6 +98,9 @@ static void fpost(uint32_t *futexp)
         assert(s != -1);
     }
 }
+
+// this is from https://bartoszmilewski.com/2008/09/01/thin-lock-vs-futex/
+// https://www.akkadia.org/drepper/futex.pdf
 
 void sys_mutex(sys_mutex_t *mutex)
 {
@@ -133,7 +138,7 @@ void sys_mutex_lock(sys_mutex_t  *mutex)
         uint32_t one = 1;
         if (atomic_load(mutex) == 2 || atomic_compare_exchange_strong(mutex, &one, 2)) {
             s = futex(mutex, FUTEX_WAIT_PRIVATE, 2, NULL, NULL, 0);
-            assert(s != -1 || errno == EAGAIN);
+            assert(s != -1 || errno == EAGAIN || errno == EINTR);
         }
 
         zero = 0;
