@@ -105,13 +105,14 @@ void sys_mutex(sys_mutex_t *mutex)
 
 void sys_mutex_free(sys_mutex_t *mutex)
 {
-    (void) mutex;
+    atomic_init(mutex, 0);
 }
 
 
 void sys_mutex_lock(sys_mutex_t  *mutex)
 {
-    assert(*mutex == 0 || *mutex == 1 || *mutex == 2);
+    uint32_t val = atomic_load(mutex);
+    assert(val == 0 || val == 1 || val == 2);
 
     long s;
 
@@ -123,23 +124,21 @@ void sys_mutex_lock(sys_mutex_t  *mutex)
 
        It returns true if the test yielded true and *ptr was updated. */
 
-    while (1) {
-        /* Is the futex available? */
-        const uint32_t zero = 0;
-        const uint32_t one = 1;
+    /* Is the futex available? */
+    uint32_t zero = 0;
+    if (atomic_compare_exchange_strong(mutex, &zero, 1)) return; /* Yes */
 
-        if (atomic_compare_exchange_strong(mutex, &zero, 1)) return; /* Yes */
+    while(1) {
+        /* Futex is not available; mark contended and wait. */
+        uint32_t one = 1;
+        if (atomic_load(mutex) == 2 || atomic_compare_exchange_strong(mutex, &one, 2)) {
+            s = futex(mutex, FUTEX_WAIT_PRIVATE, 2, NULL, NULL, 0);
+            assert(s != -1 || errno == EAGAIN);
+        }
 
-        while(1) {
-            /* Futex is not available; mark contended and wait. */
-            if (atomic_load(mutex) == 2 || atomic_compare_exchange_strong(mutex, &one, 2)) {
-                s = futex(mutex, FUTEX_WAIT_PRIVATE, 2, NULL, NULL, 0);
-                assert(s != -1 || errno == EAGAIN);
-            }
-
-            if (atomic_compare_exchange_strong(mutex, &zero, 2)) {
-                return;
-            }
+        zero = 0;
+        if (atomic_compare_exchange_strong(mutex, &zero, 2)) {
+            return;
         }
     }
 }
@@ -152,13 +151,11 @@ void sys_mutex_unlock(sys_mutex_t  *mutex)
     /* atomic_compare_exchange_strong() was described
        in comments above. */
 
-    const uint32_t one = 1;
-    if (atomic_compare_exchange_strong(mutex, &one, 0)) {
-        return;  // uncontended case, nobody was waiting
+    if (atomic_fetch_sub(mutex, 1) != 1) {
+        atomic_store(mutex, 0);
+        s = futex(mutex, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
+        assert(s != -1);
     }
-    atomic_store(mutex, 0);
-    s = futex(mutex, FUTEX_WAKE_PRIVATE, 1, NULL, NULL, 0);
-    assert(s != -1);
 }
 
 
@@ -175,7 +172,7 @@ void sys_cond(sys_cond_t* cond)
 
 void sys_cond_free(sys_cond_t *cond)
 {
-    (void) cond;
+    atomic_init(cond, 0);
 }
 
 
