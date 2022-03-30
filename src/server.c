@@ -1676,8 +1676,6 @@ qd_connector_t *qd_server_connector(qd_server_t *server)
     DEQ_INIT(connector->conn_info_list);
 
     sys_mutex(&connector->lock);
-    if (!connector->lock)
-        goto error;
     connector->timer = qd_timer(server->qd, try_open_cb, connector);
     if (!connector->timer)
         goto error;
