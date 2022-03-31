@@ -73,7 +73,7 @@ inline void sys_spin_destroy(sys_spinlock_t *const lock)
 
 inline void sys_spin_init(sys_spinlock_t *const lock)
 {
-    int ret = pthread_spin_init(lock, 0);
+    int ret = pthread_spin_init(lock, PTHREAD_PROCESS_PRIVATE);
     assert(ret == 0);
 }
 
