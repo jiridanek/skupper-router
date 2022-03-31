@@ -1051,7 +1051,7 @@ void qdr_delivery_continue_peers_CT(qdr_core_t *core, qdr_delivery_t *in_dlv, bo
 
         qdr_link_t *peer_link = qdr_delivery_link(peer);
         if (!!peer_link) {
-            sys_mutex_lock(peer_link->conn->work_lock);
+            sys_spin_lock(&peer_link->conn->work_lock);
             qdr_link_work_t *work     = peer->link_work;
             bool             activate = false;
 

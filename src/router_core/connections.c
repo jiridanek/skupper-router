@@ -1651,7 +1651,7 @@ static void qdr_link_process_initial_delivery_CT(qdr_core_t *core, qdr_link_t *l
     //
     qdr_link_t *old_link  = safe_deref_qdr_link_t(dlv->link_sp);
     if (!!old_link) {
-        sys_mutex_lock(old_link->conn->work_lock);
+        sys_spin_lock(&old_link->conn->work_lock);
         switch (dlv->where) {
         case QDR_DELIVERY_NOWHERE:
             break;
@@ -1680,7 +1680,7 @@ static void qdr_link_process_initial_delivery_CT(qdr_core_t *core, qdr_link_t *l
             qdr_delivery_decref_CT(core, dlv, "qdr_link_process_initial_delivery_CT - remove from settled list");
             break;
         }
-        sys_mutex_unlock(old_link->conn->work_lock);
+        sys_spin_unlock(&old_link->conn->work_lock);
     }
 
     //

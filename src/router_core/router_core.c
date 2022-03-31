@@ -211,14 +211,14 @@ void qdr_core_free(qdr_core_t *core)
         // If there are still any work items remaining in the link->work_list
         // remove them and free the associated link_work->error
         //
-        sys_mutex_lock(link->conn->work_lock);
+        sys_spin_lock(&link->conn->work_lock);
         qdr_link_work_t *link_work = DEQ_HEAD(link->work_list);
         while (link_work) {
             DEQ_REMOVE_HEAD(link->work_list);
             qdr_link_work_release(link_work);
             link_work = DEQ_HEAD(link->work_list);
         }
-        sys_mutex_unlock(link->conn->work_lock);
+        sys_spin_unlock(&link->conn->work_lock);
         if (link->user_context) {
             qdr_link_set_context(link, 0);
         }

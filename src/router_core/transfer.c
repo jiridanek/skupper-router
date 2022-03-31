@@ -297,7 +297,7 @@ void qdr_link_complete_sent_message(qdr_core_t *core, qdr_link_t *link)
     qdr_connection_t *conn     = link->conn;
     bool              activate = false;
 
-    sys_mutex_lock(conn->work_lock);
+    sys_spin_lock(&conn->work_lock);
     qdr_delivery_t *dlv = DEQ_HEAD(link->undelivered);
     if (!!dlv && qdr_delivery_send_complete(dlv)) {
         DEQ_REMOVE_HEAD(link->undelivered);
@@ -330,7 +330,7 @@ void qdr_link_complete_sent_message(qdr_core_t *core, qdr_link_t *link)
             activate = true;
         }
     }
-    sys_mutex_unlock(conn->work_lock);
+    sys_spin_unlock(&conn->work_lock);
 
     if (activate)
         conn->protocol_adaptor->activate_handler(conn->protocol_adaptor->user_context, conn);
