@@ -83,5 +83,5 @@ jobs:
         run: |
           docker pull quay.io/fedora/fedora:latest
           docker tag quay.io/fedora/fedora:latest ghcr.io/skupperproject/fedora:latest
-          echo "${{ github.token }}" | docker login https://ghcr.io -u ${GITHUB_ACTOR} --password-stdin
+          echo "${{ github.token }}" | docker login https://ghcr.io -u skupperproject --password-stdin
           docker push ghcr.io/skupperproject/fedora:latest
