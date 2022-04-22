@@ -30,3 +30,10 @@ edition = "2021"
 futures = "0.3"
 tokio = { version = "1", features = ["macros", "time"] }
 bollard = "0.12"
+
+#[dependencies]
+#log = { version = "0.4", features = ["std", "serde"] }
+#env_logger = "0.9"
+#testcontainers = "0.13"
+bollard = "0.12"
+#reqwest = { version = "0.11" }
