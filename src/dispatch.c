@@ -361,6 +361,7 @@ void qd_dispatch_free(qd_dispatch_t *qd)
     qd_log_finalize();
     qd_alloc_finalize();
     qd_python_finalize();
+    dlclose(qd->dl_handle);
     qd_dispatch_set_router_id(qd, NULL);
     qd_dispatch_set_router_area(qd, NULL);
     qd_iterator_finalize();
