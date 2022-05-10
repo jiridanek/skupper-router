@@ -25,11 +25,17 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
+libc = "0.2"
+getopts = "0.2"
 
 [dev-dependencies]
 futures = "0.3"
 tokio = { version = "1", features = ["macros", "time"] }
 bollard = "0.12"
+
+[build-dependencies]
+#cbindgen = "0.23"
+bindgen = "0.59"
 
 #[dependencies]
 #log = { version = "0.4", features = ["std", "serde"] }
