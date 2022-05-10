@@ -31,6 +31,8 @@
 // mod next;
 // mod next_expanded;
 mod bindings;
+
+use getopts::Matches;
 use bindings as c;
 
 /*
@@ -334,19 +336,7 @@ int main(int argc, char **argv)
     bool        daemon_mode = false;
     bool        test_hooks  = false;
 
-    static struct option long_options[] = {
-    {"config",  required_argument, 0, 'c'},
-    {"include", required_argument, 0, 'I'},
-    {"daemon",  no_argument,       0, 'd'},
-    {"pidfile", required_argument, 0, 'P'},
-    {"user",    required_argument, 0, 'U'},
-    {"help",    no_argument,       0, 'h'},
-    {"version", no_argument,       0, 'v'},
-    {"test-hooks", no_argument,    0, 'T'},
-    {0,         0,                 0,  0}
-    };
-
-    while (1) {
+        while (1) {
         int c = getopt_long(argc, argv, "c:I:dP:U:h:vT", long_options, 0);
         if (c == -1)
             break;
@@ -414,8 +404,22 @@ fn main() {
     let x = unsafe { c::qd_port_int(s.as_ptr()) };
     println!("max compressed length of a 100 byte buffer: {}", x);
 
-    let options = getopts::Options::new();
-    options.
+    let brief = format!("Usage: {} [OPTIONS]\n\n", std::env::argv[0]);
+
+    // https://rust-cli.github.io/book/tutorial/cli-args.html
+    let mut options = getopts::Options::new()
+        .optopt("c", "config", "Load configuration from file at PATH", "PATH")
+        .optopt("I", "include", "Location of Dispatch's Python library", "PATH")
+        .optflag("d", "daemon", "Run process as a SysV-style daemon")
+        .optflag("P", "pidfile", "If daemon, the file for the stored daemon pid")
+        .optopt("U", "user", "If daemon, the username to run as", "USER")
+        .optflag("T", "test-hooks", "Enable internal system testing features")
+        .optflag("v", "version", "Print the version of Qpid Dispatch Router")
+        .optflag("h", "help", "Print this help")
+    ;
+
+    let result = options.parse(std::env::args()).expect("Failed to parse commandline arguments");
+    match result { Matches { .. } => {} }
 
 
 }
