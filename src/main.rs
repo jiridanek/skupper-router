@@ -32,6 +32,7 @@
 // mod next_expanded;
 mod bindings;
 
+use std::io::Write;
 use getopts::Matches;
 use bindings as c;
 
@@ -130,36 +131,6 @@ unsafe fn check(fd: i32) {
             qd_error(QD_ERROR_RUNTIME, __VA_ARGS__);    \
         check(fd);                                      \
     } while(false)
-
-static void main_process(const char *config_path, const char *python_pkgdir, bool test_hooks, int fd)
-{
-    dispatch = qd_dispatch(python_pkgdir, test_hooks);
-    check(fd);
-    log_source = qd_log_source("MAIN"); /* Logging is initialized by qd_dispatch. */
-    qd_dispatch_validate_config(config_path);
-    check(fd);
-    qd_dispatch_load_config(dispatch, config_path);
-    check(fd);
-
-    install_signal_handler(signal_handler);
-
-    if (fd > 2) {               /* Daemon mode, fd is one end of a pipe not stdout or stderr */
-        dprintf(fd, "ok"); // Success signal
-        close(fd);
-    }
-
-    qd_server_run(dispatch);
-
-    qd_dispatch_t *d = dispatch;
-    dispatch = NULL;
-    qd_dispatch_free(d);
-
-    fflush(stdout);
-    if (exit_with_sigint) {
-        signal(SIGINT, SIG_DFL);
-        kill(getpid(), SIGINT);
-    }
-}
 
 
 static void daemon_process(const char *config_path, const char *python_pkgdir, bool test_hooks,
@@ -331,83 +302,28 @@ int main(int argc, char **argv)
     argv0 = argv[0];
     const char *config_path   = DEFAULT_CONFIG_PATH;
     const char *python_pkgdir = DEFAULT_DISPATCH_PYTHON_DIR;
-    const char *pidfile = 0;
-    const char *user    = 0;
-    bool        daemon_mode = false;
-    bool        test_hooks  = false;
-
-        while (1) {
-        int c = getopt_long(argc, argv, "c:I:dP:U:h:vT", long_options, 0);
-        if (c == -1)
-            break;
-
-        switch (c) {
-        case 'c' :
-            config_path = optarg;
-            break;
-
-        case 'I' :
-            python_pkgdir = optarg;
-            break;
-
-        case 'd' :
-            daemon_mode = true;
-            break;
-
-        case 'P' :
-            pidfile = optarg;
-            break;
-
-        case 'U' :
-            user = optarg;
-            break;
-
-        case 'h' :
-            usage(argv);
-            exit(0);
-
-        case 'v' :
-            fprintf(stdout, "%s\n", QPID_DISPATCH_VERSION);
-            exit(0);
-
-        case 'T' :
-            test_hooks = true;
-            break;
-
-        case '?' :
-            usage(argv);
-            exit(1);
-        }
-    }
-    if (optind < argc) {
-        fprintf(stderr, "Unexpected arguments:");
-        for (; optind < argc; ++optind) fprintf(stderr, " %s", argv[optind]);
-        fprintf(stderr, "\n\n");
-        usage(argv);
-        exit(1);
-    }
-
-    if (daemon_mode)
-        daemon_process(config_path, python_pkgdir, test_hooks, pidfile, user);
-    else
-        main_process(config_path, python_pkgdir, test_hooks, 2);
-
-    return 0;
 }
 
 
  */
 
+fn print_usage(program: &str, opts: getopts::Options) {
+    let brief = format!("Usage: {} [OPTIONS]", program);
+    print!("{}", opts.usage(&brief));
+}
+
 fn main() {
-    let s = std::ffi::CString::new("amqp").unwrap();
-    // let x = unsafe { next::qd_port_int(s.as_ptr()) };
-    let x = unsafe { c::qd_port_int(s.as_ptr()) };
-    println!("max compressed length of a 100 byte buffer: {}", x);
+    // let s = std::ffi::CString::new("amqp").unwrap();
+    // // let x = unsafe { next::qd_port_int(s.as_ptr()) };
+    // let x = unsafe { c::qd_port_int(s.as_ptr()) };
+    // println!("max compressed length of a 100 byte buffer: {}", x);
 
-    let brief = format!("Usage: {} [OPTIONS]\n\n", std::env::argv[0]);
+    let args: Vec<String> = std::env::args().collect();
+    let program = args[0].clone();
 
-    // https://rust-cli.github.io/book/tutorial/cli-args.html
-    let mut options = getopts::Options::new()
+    // TODO: indicate default values for --config and --include
+    let mut opts = getopts::Options::new();
+    opts
         .optopt("c", "config", "Load configuration from file at PATH", "PATH")
         .optopt("I", "include", "Location of Dispatch's Python library", "PATH")
         .optflag("d", "daemon", "Run process as a SysV-style daemon")
@@ -417,9 +333,90 @@ fn main() {
         .optflag("v", "version", "Print the version of Qpid Dispatch Router")
         .optflag("h", "help", "Print this help")
     ;
+    let matches = match opts.parse(&args[1..]) {
+        Ok(m) => { m }
+        Err(f) => {
+            println!("{}", f.to_string());
+            print_usage(&program, opts);
+            std::process::exit(1);
+        }
+    };
+    if matches.opt_present("h") {
+        print_usage(&program, opts);
+        return;
+    }
+    if matches.opt_present("v") {
+        println!("{}", "some version");
+        return;
+    }
+    if !matches.free.is_empty() {
+        // if (optind < argc) {
+        //     fprintf(stderr, "Unexpected arguments:");
+        //     for (; optind < argc; ++optind) fprintf(stderr, " %s", argv[optind]);
+        //     fprintf(stderr, "\n\n");
+        //     usage(argv);
+        //     exit(1);
+        // }
+        print_usage(&program, opts);
+        std::process::exit(1);
+    };
 
-    let result = options.parse(std::env::args()).expect("Failed to parse commandline arguments");
-    match result { Matches { .. } => {} }
+    let config_path = matches.opt_str("c").unwrap_or(String::from("/home/jdanek/repos/skupper-router/cmake-build-debug/install/etc/skupper-router/skrouterd.conf"));
+    let python_pkgdir = matches.opt_str("I").unwrap_or(String::from("/home/jdanek/repos/skupper-router/cmake-build-debug/install/lib/skupper-router/python"));
+    let daemon_mode = matches.opt_present("d");
+    let pidfile = matches.opt_str("P");
+    let user = matches.opt_str("U");
+    let test_hooks = matches.opt_present("T");
 
+    if daemon_mode {
+        daemon_process(config_path, python_pkgdir, test_hooks, pidfile, user);
+    } else {
+        main_process(config_path, python_pkgdir, test_hooks, 2);
+    }
 
+    return;
 }
+
+fn main_process(config_path: String, python_pkgdir: String, test_hooks: bool, fd: i32) {
+        let python_pkgdir_cstr = std::ffi::CString::new(python_pkgdir).unwrap();
+        let main_cstr = std::ffi::CString::new("MAIN").unwrap();
+        let config_path_cstr = std::ffi::CString::new(config_path).unwrap();
+
+    unsafe {
+        let dispatch = c::qd_dispatch(python_pkgdir_cstr.as_ptr(), test_hooks);
+        check(fd);
+        let log_source = c::qd_log_source(main_cstr.as_ptr()); /* Logging is initialized by qd_dispatch. */
+        c::qd_dispatch_validate_config(config_path_cstr.as_ptr());
+        check(fd);
+        c::qd_dispatch_load_config(dispatch, config_path_cstr.as_ptr());
+        check(fd);
+
+        // install_signal_handler(signal_handler);
+
+        // if (fd > 2) {               /* Daemon mode, fd is one end of a pipe not stdout or stderr */
+        //     dprintf(fd, "ok"); // Success signal
+        //     close(fd);
+        // }
+
+        c::qd_server_run(dispatch);
+
+        c::qd_dispatch_free(dispatch);
+
+        std::io::stdout().flush().unwrap();
+        // if (exit_with_sigint) {
+        //     signal(SIGINT, SIG_DFL);
+        //     kill(getpid(), SIGINT);
+        // }
+    }
+}
+
+fn daemon_process(config_path: String, python_pkgdir: String, test_hooks: bool, pidfile: Option<String>, user: Option<String>) {
+    todo!()
+}
+
+// https://rust-cli.github.io/book/tutorial/cli-args.html
+    // https://github.com/DarthUDP/daemonize-me/tree/trunk/src
+
+
+
+

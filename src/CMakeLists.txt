@@ -172,8 +172,9 @@ endif()
 add_library(skupper-router OBJECT ${qpid_dispatch_SOURCES})
 target_include_directories(skupper-router PRIVATE ${qpid_dispatch_INCLUDES})
 target_link_libraries(skupper-router PRIVATE ${qpid_dispatch_LIBRARIES})
+target_compile_options(skupper-router PRIVATE -fPIC)
 
-add_library(skupper-router-static STATIC)
+add_library(skupper-router-static SHARED)
 target_link_libraries(skupper-router-static PUBLIC skupper-router)
 
 # check for various function availability

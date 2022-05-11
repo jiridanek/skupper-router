@@ -25,11 +25,15 @@ fn main() {
     println!("cargo:rustc-link-arg=-L./cmake-build-debug/src");
     println!("cargo:rustc-link-arg=-no-pie");
     println!("cargo:rustc-link-arg=-Wl,-rpath,/home/jdanek/repos/qpid/qpid-proton/build/install/lib64");
+    println!("cargo:rustc-link-arg=-Wl,-rpath,/home/jdanek/repos/skupper-router/cmake-build-debug/src");
 
     println!("cargo:rustc-link-search=native={}", "./cmake-build-debug/src");
     println!("cargo:rustc-link-search=native={}", "/home/jdanek/repos/qpid/qpid-proton/build/install/lib64");
     println!("cargo:rustc-link-search=native={}", "/lib64");
-    println!("cargo:rustc-link-lib=static=skupper-router-static");
+
+    // println!("cargo:rustc-link-lib=static=skupper-router-static");
+    println!("cargo:rustc-link-lib=dylib=skupper-router-static");
+
     println!("cargo:rustc-link-lib=dylib=python3.10"); // use same as CMake uses?
     println!("cargo:rustc-link-lib=dylib=nghttp2");
     println!("cargo:rustc-link-lib=dylib=websockets");
