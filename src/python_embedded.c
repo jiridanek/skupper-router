@@ -857,7 +857,7 @@ static void qd_python_setup(void)
         //
         // Add LogAdapter
         //
-        PyModule_AddType(m, (PyTypeObject*) &LogAdapterType);
+//        PyModule_AddType(m, (PyTypeObject*) &LogAdapterType);
 
         qd_register_constant(m, "LOG_TRACE",    QD_LOG_TRACE);
         qd_register_constant(m, "LOG_DEBUG",    QD_LOG_DEBUG);
@@ -869,7 +869,7 @@ static void qd_python_setup(void)
 
         qd_register_constant(m, "LOG_STACK_LIMIT", 8); /* Limit stack traces for logging. */
 
-        PyModule_AddType(m, (PyTypeObject*) &IoAdapterType);
+//        PyModule_AddType(m, (PyTypeObject*) &IoAdapterType);
 
         qd_register_constant(m, "TREATMENT_MULTICAST_FLOOD",  QD_TREATMENT_MULTICAST_FLOOD);
         qd_register_constant(m, "TREATMENT_MULTICAST_ONCE",   QD_TREATMENT_MULTICAST_ONCE);
