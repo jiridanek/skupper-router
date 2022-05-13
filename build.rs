@@ -19,6 +19,21 @@
 
 use std::env;
 
+// https://github.com/rust-lang/rust-bindgen/issues/687
+#[derive(Debug)]
+struct IgnoreMacros(std::collections::HashSet<String>);
+
+impl bindgen::callbacks::ParseCallbacks for IgnoreMacros {
+    fn will_parse_macro(&self, name: &str) -> bindgen::callbacks::MacroParsingBehavior {
+        if self.0.contains(name) {
+            bindgen::callbacks::MacroParsingBehavior::Ignore
+        } else {
+            bindgen::callbacks::MacroParsingBehavior::Default
+        }
+    }
+}
+
+
 // https://doc.rust-lang.org/cargo/reference/build-scripts.html
 fn main() {
     // https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-arg
@@ -41,17 +56,38 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=qpid-proton-proactor");
     println!("cargo:rustc-link-lib=dylib=qpid-proton-tls");
 
+    let ignored_macros = IgnoreMacros(
+            vec![
+                "FP_INT_UPWARD".into(),
+                "FP_INT_DOWNWARD".into(),
+                "FP_INT_TOWARDZERO".into(),
+                "FP_INT_TONEARESTFROMZERO".into(),
+                "FP_INT_TONEAREST".into(),
+                "FP_INFINITE".into(),
+                "FP_NAN".into(),
+                "FP_NORMAL".into(),
+                "FP_SUBNORMAL".into(),
+                "FP_ZERO".into(),
+                "IPPORT_RESERVED".into(),
+            ]
+            .into_iter()
+            .collect(),
+        );
+
     // https://rust-lang.github.io/rust-bindgen/tutorial-3.html
     let bindings = bindgen::Builder::default()
+        .clang_arg("-I/usr/include/python3.10")
         .clang_arg("-I./include")
         .clang_arg("-I./cmake-build-debug/src") // config.h
         .clang_arg("-I/home/jdanek/repos/qpid/qpid-proton/build/install/include")
         // The input header we would like to generate
         // bindings for.
         .header("include/qpid/dispatch.h")
+        .header("include/qpid/dispatch/python_embedded.h")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
+        .parse_callbacks(Box::new(ignored_macros))
         // Finish the builder and generate the bindings.
         .generate()
         // Unwrap the Result and panic on failure.

@@ -28,16 +28,21 @@
 // #![allow(non_snake_case)]
 // include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
+use std::ffi::c_void;
+use std::io::{Read, Write};
+use std::os::unix::io::FromRawFd;
+
+use getopts::Matches;
+use libc::c_char;
+
+use bindings as c;
+
+use crate::bindings::{PyGILState_STATE, qd_dispatch_t};
+use crate::c::qd_server_stop;
+
 // mod next;
 // mod next_expanded;
 mod bindings;
-
-use std::io::{Read, Write};
-use std::os::unix::io::FromRawFd;
-use getopts::Matches;
-use bindings as c;
-use crate::bindings::qd_dispatch_t;
-use crate::c::qd_server_stop;
 
 // use global variable so that we can access this from signal handler
 static mut dispatch: *mut qd_dispatch_t = std::ptr::null_mut();
@@ -93,7 +98,6 @@ unsafe fn qd_log(
 }
 
 unsafe fn check(fd: i32) {
-
     let argv0 = std::ffi::CString::new("skupper-router").unwrap();
     let module = std::ffi::CString::new("source").unwrap();
     let log_source = c::qd_log_source(module.as_ptr());
@@ -156,6 +160,20 @@ fn print_usage(program: &str, opts: getopts::Options) {
     let brief = format!("Usage: {} [OPTIONS]", program);
     print!("{}", opts.usage(&brief));
 }
+
+#[no_mangle]
+pub extern "C" fn qd_python_lock() -> c::qd_python_lock_state_t {
+    println!("FAKEEE");
+    let fname = std::ffi::CString::new("qd_python_lock").unwrap();
+    // unsafe { libc::dlopen(libc::RTLD_NEXT as *const c_char, 0); }
+    let ptr = unsafe { libc::dlsym(libc::RTLD_NEXT, fname.as_ptr()) };
+    // let symbol: unsafe extern "C" fn() -> c::qd_python_lock_state_t = ptr as unsafe extern "C" fn() -> c::qd_python_lock_state_t;
+    // https://rust-lang.github.io/unsafe-code-guidelines/layout/function-pointers.html
+    let symbol = unsafe { std::mem::transmute::<*mut c_void, unsafe extern "C" fn() -> c::qd_python_lock_state_t>(ptr) };
+    let result: c::qd_python_lock_state_t = unsafe { symbol() };
+    return result;
+}
+
 
 fn main() {
     // let s = std::ffi::CString::new("amqp").unwrap();
@@ -246,19 +264,21 @@ extern fn handle_signal(signal: i32) {
                 qd_server_stop(dispatch); /* qpid_server_stop is signal-safe */
             }
         }
-        _ => {
-
-        }
+        _ => {}
     }
 }
 
 fn main_process(config_path: String, python_pkgdir: String, test_hooks: bool, fd: i32) {
-        let python_pkgdir_cstr = std::ffi::CString::new(python_pkgdir).unwrap();
-        let main_cstr = std::ffi::CString::new("MAIN").unwrap();
-        let config_path_cstr = std::ffi::CString::new(config_path).unwrap();
+    let python_pkgdir_cstr = std::ffi::CString::new(python_pkgdir).unwrap();
+    let main_cstr = std::ffi::CString::new("MAIN").unwrap();
+    let config_path_cstr = std::ffi::CString::new(config_path).unwrap();
+
+    // unsafe {
+    //     c::qd_python_lock();
+    // }
 
     unsafe {
-        dispatch= c::qd_dispatch(python_pkgdir_cstr.as_ptr(), test_hooks);
+        dispatch = c::qd_dispatch(python_pkgdir_cstr.as_ptr(), test_hooks);
         check(fd);
         let log_source = c::qd_log_source(main_cstr.as_ptr()); /* Logging is initialized by qd_dispatch. */
         c::qd_dispatch_validate_config(config_path_cstr.as_ptr());
@@ -334,7 +354,7 @@ fn daemon_process(config_path: String, python_pkgdir: String, test_hooks: bool, 
         //
         // Detach any terminals and create an independent session
         //
-        if unsafe{ libc::setsid() < 0 } {
+        if unsafe { libc::setsid() < 0 } {
             fail(pipefd[1], "Cannot start a new session");
         }
 
@@ -375,7 +395,7 @@ fn daemon_process(config_path: String, python_pkgdir: String, test_hooks: bool, 
             // fully qualified path to the config file.  This needs to be done
             // since the daemon will set "/" to its working directory.
             //
-            let config_path= std::path::PathBuf::from(config_path);
+            let config_path = std::path::PathBuf::from(config_path);
             let config_path_full = std::fs::canonicalize(config_path).expect("Unable to canonicalize config path");
             //
             // Set the current directory to "/" to avoid blocking
@@ -400,13 +420,12 @@ fn daemon_process(config_path: String, python_pkgdir: String, test_hooks: bool, 
                 let pwd = unsafe { libc::getpwnam(user_cstr.as_ptr()) };
                 if pwd.is_null() { fail(pipefd[1], &*format!("Can't look up user {}", user)) };
                 if unsafe { libc::setuid((*pwd).pw_uid) < 0 } {
-                    fail(pipefd[1], &*format!("Can't set user ID for user {}, errno={}", user, unsafe { *libc::__errno_location() } ));
+                    fail(pipefd[1], &*format!("Can't set user ID for user {}, errno={}", user, unsafe { *libc::__errno_location() }));
                 }
                 //if (setgid(pwd->pw_gid) < 0) fail(pipefd[1], "Can't set group ID for user %s, errno=%d", user, errno);
             }
 
             main_process(config_path_full.to_string_lossy().to_string(), python_pkgdir, test_hooks, pipefd[1]);
-
         } else {
             //
             // Exit first child
@@ -436,7 +455,7 @@ fn daemon_process(config_path: String, python_pkgdir: String, test_hooks: bool, 
 }
 
 // https://rust-cli.github.io/book/tutorial/cli-args.html
-    // https://github.com/DarthUDP/daemonize-me/tree/trunk/src
+// https://github.com/DarthUDP/daemonize-me/tree/trunk/src
 
 
 
