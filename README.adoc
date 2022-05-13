@@ -16,7 +16,12 @@
 // under the License.
 :toc:
 :toclevels: 5
-= Skupper Router
+
+= Skupper Router (the Rusty fork)
+
+```
+bash -c 'source cmake-build-debug/config.sh; cargo run --'
+```
 
 image:https://github.com/skupperproject/skupper-router/actions/workflows/build.yaml/badge.svg[
 "GitHub Actions"
