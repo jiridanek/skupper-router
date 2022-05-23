@@ -97,9 +97,9 @@ fn main() {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
-    bindings
-        .write_to_file("src/bindings.rs")
-        .expect("Couldn't write bindings!");
+    // bindings
+    //     .write_to_file("src/bindings.rs")
+    //     .expect("Couldn't write bindings!");
 }
 
 //     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();

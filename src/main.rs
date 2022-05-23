@@ -35,14 +35,15 @@ use std::os::unix::io::FromRawFd;
 use getopts::Matches;
 use libc::c_char;
 
-use bindings as c;
+// use bindings as c;
+mod next;
+use next as c;
 
-use crate::bindings::{PyGILState_STATE, qd_dispatch_t};
+use crate::next::{PyGILState_STATE, qd_dispatch_t};
 use crate::c::qd_server_stop;
 
-// mod next;
 // mod next_expanded;
-mod bindings;
+// mod bindings;
 
 // use global variable so that we can access this from signal handler
 static mut dispatch: *mut qd_dispatch_t = std::ptr::null_mut();
