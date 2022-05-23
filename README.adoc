@@ -19,9 +19,10 @@
 
 = Skupper Router (the Rusty fork)
 
-```
+[source]
+----
 bash -c 'source cmake-build-debug/config.sh; cargo run --'
-```
+----
 
 image:https://github.com/skupperproject/skupper-router/actions/workflows/build.yaml/badge.svg[
 "GitHub Actions"
