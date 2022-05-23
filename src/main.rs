@@ -180,7 +180,7 @@ fn main() {
     // let s = std::ffi::CString::new("amqp").unwrap();
     // // let x = unsafe { next::qd_port_int(s.as_ptr()) };
     // let x = unsafe { c::qd_port_int(s.as_ptr()) };
-    // println!("max compressed length of a 100 byte buffer: {}", x);
+    // println!("port number is: {}", x);
 
     let args: Vec<String> = std::env::args().collect();
     let program = args[0].clone();
