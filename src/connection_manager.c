@@ -428,7 +428,7 @@ static qd_error_t load_server_config(qd_dispatch_t *qd, qd_server_config_t *conf
     // For now we are hardwiring this attribute to true.  If there's an outcry from the
     // user community, we can revisit this later.
     //
-    config->allowInsecureAuthentication = true;
+    config->allowInsecureAuthentication = false;
     config->verify_host_name = verifyHostname;
 
     char *stripAnnotations  = qd_entity_opt_string(entity, "stripAnnotations", 0);
