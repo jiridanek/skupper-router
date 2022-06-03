@@ -15,11 +15,6 @@ leak:^parse_failover_property_list$
 leak:^callback_healthz$
 leak:^callback_metrics$
 
-# to be triaged; system_tests_http1_adaptor
-leak:^pn_condition$
-leak:^pn_raw_connection$
-leak:^pgetaddrinfo$
-
 # to be triaged; system_tests_link_routes
 leak:^pni_init_default_logger$
 
