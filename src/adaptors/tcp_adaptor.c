@@ -1260,6 +1260,7 @@ static void qd_tcp_listener_destroy(qd_tcp_listener_t *li)
         sys_atomic_destroy(&li->ref_count);
         sys_mutex_free(li->lock);
         qd_free_tcp_adaptor_config(li->config, tcp_adaptor->log_source);
+        sys_mutex_free(li->tcp_stats->stats_lock);
         free_qdr_tcp_stats_t(li->tcp_stats);
         free_qd_tcp_listener_t(li);
     }
@@ -2164,10 +2165,7 @@ static void qdr_tcp_adaptor_final(void *adaptor_context)
     qd_tcp_listener_t *tl = DEQ_HEAD(adaptor->listeners);
     while (tl) {
         qd_tcp_listener_t *next = DEQ_NEXT(tl);
-        qd_free_tcp_adaptor_config(tl->config, tcp_adaptor->log_source);
-        sys_mutex_free(tl->tcp_stats->stats_lock);
-        free_qdr_tcp_stats_t(tl->tcp_stats);
-        free_qd_tcp_listener_t(tl);
+        qd_tcp_listener_destroy(tl);
         tl = next;
     }
 
