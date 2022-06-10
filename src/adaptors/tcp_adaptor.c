@@ -2176,6 +2176,7 @@ static void qdr_tcp_adaptor_final(void *adaptor_context)
         qd_tcp_connector_t *next = DEQ_NEXT(tr);
         qd_free_tcp_adaptor_config(tr->config, tcp_adaptor->log_source);
         free_qdr_tcp_connection((qdr_tcp_connection_t*) tr->dispatcher_conn);
+        sys_mutex_free(tr->tcp_stats->stats_lock);
         free_qdr_tcp_stats_t(tr->tcp_stats);
         free_qd_tcp_connector_t(tr);
         tr = next;
