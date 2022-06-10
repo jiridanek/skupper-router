@@ -65,6 +65,8 @@ void qd_entity_cache_free_entries() {
         event = DEQ_HEAD(event_list);
     }
     sys_mutex_unlock(event_lock);
+
+    sys_mutex_free(event_lock);
 }
 
 static void push_event(action_t action, const char *type, void *object) {
