@@ -1035,8 +1035,8 @@ void qdr_delivery_mcast_outbound_update_CT(qdr_core_t *core,
 
 static void qdr_delete_delivery_CT(qdr_core_t *core, qdr_action_t *action, bool discard)
 {
-    if (!discard)
-        qdr_delete_delivery_internal_CT(core, action->args.delivery.delivery);
+    // ignore discard flag, the delivery mutex and associated message has to be freed on shutdown
+    qdr_delete_delivery_internal_CT(core, action->args.delivery.delivery);
 }
 
 
