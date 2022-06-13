@@ -843,6 +843,10 @@ void qdr_link_cleanup_deliveries_CT(qdr_core_t *core, qdr_connection_t *conn, qd
         qdr_delivery_decref_CT(core, ref->dlv, "qdr_link_cleanup_deliveries_CT - remove from updated list");
         qdr_del_delivery_ref(&updated_deliveries, ref);
         ref = DEQ_HEAD(updated_deliveries);
+
+//        pn_delivery_tag_t dtag = pn_delivery_tag(pnd);
+//        qdr_node_disconnect_deliveries(core, qdr_link_link, ref->dlv, ref->dlv->context);
+        qdr_delivery_decref(core, ref->dlv, "HACK removed reference from pn_delivery");
     }
 
     //
