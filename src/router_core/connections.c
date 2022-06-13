@@ -846,7 +846,11 @@ void qdr_link_cleanup_deliveries_CT(qdr_core_t *core, qdr_connection_t *conn, qd
 
 //        pn_delivery_tag_t dtag = pn_delivery_tag(pnd);
 //        qdr_node_disconnect_deliveries(core, qdr_link_link, ref->dlv, ref->dlv->context);
-        qdr_delivery_decref(core, ref->dlv, "HACK removed reference from pn_delivery");
+        const void * context = qdr_delivery_get_context(ref->dlv);
+        if (context) {
+            qdr_delivery_set_context(ref->dlv, NULL);
+            qdr_delivery_decref(core, ref->dlv, "HACK removed reference from pn_delivery");
+        }
     }
 
     //
