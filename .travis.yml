@@ -20,7 +20,7 @@
 language: c
 cache: ccache
 os: linux
-dist: focal
+dist: jammy
 
 # the test matrix
 arch:
