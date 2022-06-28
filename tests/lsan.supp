@@ -3,7 +3,7 @@
 #
 
 # DISPATCH-1844 - shutdown leak
-leak:sys_mutex
+leak:^sys_mutex$
 
 # leak of qd_message_t (DISPATCH-1699)
 leak:^qd_message_copy$
