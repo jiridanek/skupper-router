@@ -31,15 +31,14 @@ DISPATCH_CTEST_EXTRA='-E ^python-checker$'
 export NPROC=3
 export QPID_SYSTEM_TEST_TIMEOUT=300
 export QPID_SYSTEM_TEST_SKIP_FALLBACK_SWITCHOVER_TEST=True
-export QPID_SYSTEM_TEST_SKIP_HTTP2_LARGE_IMAGE_UPLOAD_TEST=True
 
 echo '==='
 echo 'Install additional prerequisites'
 echo '==='
 
 if [[ ${TRAVIS_CPU_ARCH} == "arm64" ]]; then
-  sudo apt-get install -y clang-12 llvm-12-dev
-  export CC=clang-12 CXX=clang++-12
+  sudo apt-get install -y clang-14 llvm-14-dev
+  export CC=clang-14 CXX=clang++-14
 fi
 
 # Update pip, it may prevent issues later
