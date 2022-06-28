@@ -8,8 +8,8 @@ install: true
 jobs:
   include:
     - dist: bionic
-      arch: amd64
+      arch: arm64
     - dist: focal
-      arch: amd64
+      arch: arm64
     - dist: jammy
-      arch: amd64
+      arch: arm64
