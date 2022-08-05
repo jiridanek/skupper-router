@@ -65,6 +65,11 @@ def quart_available():
 
 
 def skip_test():
+    print("python_37_available", python_37_available())
+    print("quart_available", quart_available())
+    print("curl_available", curl_available())
+    print("python", sys.executable)
+    print("env", os.environ)
     if python_37_available() and quart_available() and curl_available():
         return False
     return True
