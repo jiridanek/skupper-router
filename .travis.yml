@@ -69,6 +69,7 @@ addons:
 script:
   - ulimit -c unlimited
   - export PATH=${PATH}:${HOME}/.local/bin
+  - python3 -m pip install --user --upgrade pip
   - python3 -m pip install --user quart
   - quart --version
 #  - scripts/travisci_build.sh
