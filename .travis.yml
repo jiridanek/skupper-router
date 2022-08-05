@@ -71,7 +71,7 @@ script:
   - ulimit -c unlimited
   - export PATH=${PATH}:${HOME}/.local/bin
   - python3 -m pip install --upgrade pip
-  - python3 -m pip install quart
+  - python3 -m pip install quart --ignore-installed
   - quart --version
-#  - scripts/travisci_build.sh
-#  - find -name 'core' -exec ${TRAVIS_BUILD_DIR}/scripts/gha_analyze_coredump.sh {} \;
+  - scripts/travisci_build.sh
+  - find -name 'core' -exec ${TRAVIS_BUILD_DIR}/scripts/gha_analyze_coredump.sh {} \;
