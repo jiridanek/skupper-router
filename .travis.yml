@@ -68,5 +68,6 @@ addons:
 
 script:
   - ulimit -c unlimited
+  - PATH=${PATH}:${HOME}/.local/bin
   - scripts/travisci_build.sh
   - find -name 'core' -exec ${TRAVIS_BUILD_DIR}/scripts/gha_analyze_coredump.sh {} \;
