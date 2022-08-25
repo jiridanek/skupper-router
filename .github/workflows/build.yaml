@@ -61,6 +61,7 @@ jobs:
       VERBOSE: 1
 
       ProtonCMakeExtraArgs: >
+        -DPython_EXECUTABLE=${{github.workspace}}/venv/bin/python
         -DCMAKE_C_COMPILER_LAUNCHER=ccache
         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
         -DBUILD_BINDINGS=python
