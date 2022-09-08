@@ -25,6 +25,12 @@
 #define DOCTEST_CONFIG_TREAT_CHAR_STAR_AS_STRING
 #define DOCTEST_CONFIG_SUPER_FAST_ASSERTS
 
-#include "doctest.h"
+#include "catch2/catch_amalgamated.hpp"
+
+// compatibility define for doctest tests to work with catch2
+
+// https://github.com/catchorg/Catch2/issues/929#issuecomment-321928622
+#define CHECK_MESSAGE(cond, ...) [&] { CAPTURE(__VA_ARGS__); CHECK(cond); }()
+#define REQUIRE_MESSAGE(cond, ...) [&] { CAPTURE(__VA_ARGS__); REQUIRE(cond); }()
 
 #endif  // QDR_DOCTEST

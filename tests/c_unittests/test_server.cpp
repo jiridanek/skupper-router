@@ -33,7 +33,7 @@ static void test_normalize_memory_size(uint64_t bytes, double expected_value, co
     const char *suffix = NULL;
     double value       = testonly_normalize_memory_size(bytes, &suffix);
     CHECK(value == expected_value);
-    CHECK(suffix == expected_suffix);
+    CHECK(strcmp(suffix, expected_suffix) == 0);
 }
 
 TEST_CASE("normalize_memory_size")

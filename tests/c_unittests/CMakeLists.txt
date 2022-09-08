@@ -33,6 +33,7 @@ target_compile_options(static_accessors_server_c PRIVATE -fvisibility=hidden)
 add_executable(c_unittests
         qdr_stubbing_probe.cpp
         c_unittests_main.cpp
+        catch2/catch_amalgamated.cpp
         doctest.h
         qdr_doctest.hpp
         helpers.cpp
@@ -43,7 +44,9 @@ add_executable(c_unittests
         test_listener_startup.cpp
         test_router_startup.cpp
         test_server.cpp
-        test_terminus.cpp test_alloc_pool.cpp)
+        test_terminus.cpp
+        test_alloc_pool.cpp)
+target_compile_definitions(c_unittests PRIVATE CATCH_AMALGAMATED_CUSTOM_MAIN)
 target_link_libraries(c_unittests cpp-stub pthread skupper-router static_accessors_server_c ${bfd_lib})
 # http_common.h includes "delivery.h"
 target_include_directories(c_unittests PRIVATE ${CMAKE_SOURCE_DIR}/src/router_core)

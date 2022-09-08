@@ -33,8 +33,11 @@ void qd_connection_manager_delete_listener(qd_dispatch_t *qd, void *impl);
 
 /// GCC 4.8 made a questionable choice to implement std::regex_search to always
 /// return false. Meaning that tests cannot use regex on RHEL 7
-static bool regex_is_broken() {
-    return !std::regex_search("", std::regex(""));
+static const char * regex_is_broken() {
+    if (!std::regex_search("", std::regex(""))) {
+        return "[.]";
+    }
+    return "";
 }
 
 void check_amqp_listener_startup_log_message(qd_server_config_t config, std::string listen, std::string stop)
@@ -101,7 +104,7 @@ void check_http_listener_startup_log_message(qd_server_config_t config, std::str
 
 }
 
-TEST_CASE("Start AMQP listener with zero port" * doctest::skip(regex_is_broken()))
+TEST_CASE("Start AMQP listener with zero port", regex_is_broken())
 {
     std::thread([] {
         qd_server_config_t config{};
@@ -117,7 +120,7 @@ TEST_CASE("Start AMQP listener with zero port" * doctest::skip(regex_is_broken()
     }).join();
 }
 
-TEST_CASE("Start AMQP listener with zero port and a name" * doctest::skip(regex_is_broken()))
+TEST_CASE("Start AMQP listener with zero port and a name", regex_is_broken())
 {
     std::thread([] {
         qd_server_config_t config{};
@@ -134,7 +137,7 @@ TEST_CASE("Start AMQP listener with zero port and a name" * doctest::skip(regex_
     }).join();
 }
 
-TEST_CASE("Start HTTP listener with zero port" * doctest::skip(regex_is_broken()))
+TEST_CASE("Start HTTP listener with zero port", regex_is_broken())
 {
     std::thread([] {
         qd_server_config_t config{};
@@ -153,7 +156,7 @@ TEST_CASE("Start HTTP listener with zero port" * doctest::skip(regex_is_broken()
     }).join();
 }
 
-TEST_CASE("Start HTTP listener with zero port and a name" * doctest::skip(regex_is_broken()))
+TEST_CASE("Start HTTP listener with zero port and a name", regex_is_broken())
 {
     std::thread([] {
         qd_server_config_t config{};

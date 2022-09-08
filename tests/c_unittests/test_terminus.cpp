@@ -47,44 +47,44 @@ TEST_CASE("test_safe_snprintf") {
     size_t len;
     char   output[OUTPUT_SIZE];
 
-    SUBCASE("valid_inputs") {
-        SUBCASE("") {
+    SECTION("valid_inputs") {
+        SECTION("") {
             len = safe_snprintf(output, LEN + 10, TEST_MESSAGE);
             CHECK(LEN == len);
-            CHECK(output == TEST_MESSAGE);
+            CHECK(strcmp(output, TEST_MESSAGE) == 0);
         }
 
-        SUBCASE("") {
+        SECTION("") {
             len = safe_snprintf(output, LEN + 1, TEST_MESSAGE);
             CHECK(LEN == len);
-            CHECK(output == TEST_MESSAGE);
+            CHECK(strcmp(output, TEST_MESSAGE) == 0);
         }
 
-        SUBCASE("") {
+        SECTION("") {
             len = safe_snprintf(output, LEN, TEST_MESSAGE);
             CHECK(LEN - 1 == len);
-            CHECK(output == "somethin");
+            CHECK(strcmp(output, "somethin") == 0);
         }
 
-        SUBCASE("") {
+        SECTION("") {
             len = safe_snprintf(output, 0, TEST_MESSAGE);
             CHECK(0 == len);
         }
 
-        SUBCASE("") {
+        SECTION("") {
             output[0] = 'a';
             len = safe_snprintf(output, 1, TEST_MESSAGE);
             CHECK(0 == len);
             CHECK('\0' == output[0]);
         }
 
-        SUBCASE("") {
+        SECTION("") {
             len = safe_snprintf(output, (int)-1, TEST_MESSAGE);
             CHECK(0 == len);
         }
     }
 
-    SUBCASE("vsnprintf failure (_STUB_)") {
+    SECTION("vsnprintf failure (_STUB_)") {
         Stub stub;
         stub.set(vsnprintf, vsnprintf_stub::stub);
         vsnprintf_stub::rc = -1;
@@ -97,15 +97,15 @@ TEST_CASE("test_safe_snprintf") {
 }
 
 TEST_CASE("test_qdr_terminus_format") {
-    SUBCASE("empty") {
+    SECTION("empty") {
         char   output[3];
         size_t size = 3;
         output[2] = 'A';
 
-        SUBCASE("") {
+        SECTION("") {
             qdr_terminus_format(NULL, output, &size);
 
-            CHECK(output == "{}");
+            CHECK(strcmp(output, "{}") == 0);
             CHECK(size == 1);
         }
     }

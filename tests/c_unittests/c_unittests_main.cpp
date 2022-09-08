@@ -58,7 +58,18 @@ bool check_stubbing_works()
 // https://github.com/doctest/doctest/blob/master/doc/markdown/main.md
 int main(int argc, char** argv)
 {
-    doctest::Context context;
+    Catch::Session session; // There must be exactly one instance
+
+    // writing to session.configData() here sets defaults
+    // this is the preferred way to set them
+
+    int returnCode = session.applyCommandLine( argc, argv );
+    if( returnCode != 0 ) // Indicates a command line error
+        return returnCode;
+
+    // writing to session.configData() or session.Config() here
+    // overrides command line args
+    // only do this if you know you need to
 
     if (!check_stubbing_works()) {
 #ifdef QD_REQUIRE_STUBBING_WORKS
@@ -67,17 +78,13 @@ int main(int argc, char** argv)
 #else
         fprintf(stderr, "Stubbing doesn't work. Define QD_REQUIRE_STUBBING_WORKS to get an abort()\n");
 #endif
-        context.addFilter("test-case-exclude", "*_STUB_*"); // skip testcases that require stubbing
-        context.addFilter("subcase-exclude", "*_STUB_*"); //  ditto for subcases
+        session.configData().testsOrTags.insert(session.configData().testsOrTags.begin(), "~stubbed");
     }
 
-    context.applyCommandLine(argc, argv);
+    int numFailed = session.run();
 
-    int res = context.run();
-
-    if (context.shouldExit()) {
-        return res;
-    }
-
-    return res;
+    // numFailed is clamped to 255 as some unices only use the lower 8 bits.
+    // This clamping has already been applied, so just return it here
+    // You can also do any post run clean-up here
+    return numFailed;
 }

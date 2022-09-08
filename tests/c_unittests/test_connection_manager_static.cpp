@@ -50,7 +50,7 @@ static void check_password(qd_dispatch_t *qd, const char *password, const char *
     qd_config_ssl_profile_t *profile = qd_dispatch_configure_ssl_profile(qd, entity);
     if (expect_success) {
         REQUIRE(profile != nullptr);
-        CHECK(profile->ssl_password == expected);
+        CHECK(strcmp(profile->ssl_password, expected) == 0);
         qd_connection_manager_delete_ssl_profile(qd, profile);
     } else {
         REQUIRE(profile == nullptr);
@@ -75,7 +75,7 @@ TEST_CASE("qd_dispatch_configure_ssl_profile")
         // previous functions dropped Python GIL
         PyGILState_Ensure();
 
-        SUBCASE("qd_config_process_password")
+        SECTION("qd_config_process_password")
         {
             check_password(qd, "", "");
             check_password(qd, "swordfish", "swordfish");
@@ -84,7 +84,7 @@ TEST_CASE("qd_dispatch_configure_ssl_profile")
             check_password(qd, "pass:swordfish", "swordfish");
             check_password(qd, "literal:swordfish", "swordfish");
 
-            SUBCASE("env: (_STUB_)")
+            SECTION("env: (_STUB_)")
             {
                 check_password(qd, "env:no_such_env_variable", "", false);
 
@@ -97,13 +97,13 @@ TEST_CASE("qd_dispatch_configure_ssl_profile")
                             return "";
                         }
 
-                        CHECK(name == "some_env_variable");
+                        CHECK(strcmp(name, "some_env_variable") == 0);
                         return "some_password";
                     });
                 check_password(qd, "env:some_env_variable", "some_password");
             }
 
-            SUBCASE("file: (_STUB_)")
+            SECTION("file: (_STUB_)")
             {
                 // is this behavior intended?
                 check_password(qd, "file:/dev/null", "file:/dev/null");
@@ -112,8 +112,8 @@ TEST_CASE("qd_dispatch_configure_ssl_profile")
                     Stub s{};
                     s.set(
                         fopen, +[](const char *name, const char *mode) {
-                            CHECK(name == "/some/file");
-                            CHECK(mode == "r");
+                            CHECK(strcmp(name, "/some/file") == 0);
+                            CHECK(strcmp(mode, "r") == 0);
 
                             // create fake file in memory and return it
                             int fd           = memfd_create("tmpfile", 0);

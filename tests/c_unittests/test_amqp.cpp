@@ -24,7 +24,7 @@ extern "C" {
 }
 
 TEST_CASE("test_qd_port_int") {
-    SUBCASE("numeric ports, edge cases") {
+    SECTION("numeric ports, edge cases") {
         CHECK(qd_port_int("-1") == -1);
         CHECK(qd_port_int("0") == 0);
         CHECK(qd_port_int("1") == 1);
@@ -32,12 +32,12 @@ TEST_CASE("test_qd_port_int") {
         CHECK(qd_port_int("65535") == 65535);
         CHECK(qd_port_int("65536") == -1);
     }
-    SUBCASE("well known symbolic ports") {
+    SECTION("well known symbolic ports") {
         CHECK(qd_port_int("amqp") == 5672);
         CHECK(qd_port_int("amqps") == 5671);
         CHECK(qd_port_int("http") == 80);
     }
-    SUBCASE("invalid inputs") {
+    SECTION("invalid inputs") {
         CHECK(qd_port_int("") == -1);
 
         CHECK(qd_port_int("42http") == -1);

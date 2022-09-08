@@ -73,7 +73,7 @@ TEST_CASE("Configure and start HTTP_ADAPTOR listener")
         // previous functions dropped Python GIL
         auto state = PyGILState_Ensure();
 
-        SUBCASE("empty config should fail but not crash")
+        SECTION("empty config should fail but not crash")
         {
             std::map<std::string, entity_value_t> config = {
                 // empty map
@@ -91,7 +91,7 @@ TEST_CASE("Configure and start HTTP_ADAPTOR listener")
             CHECK_MESSAGE(logging.find(unable) != std::string::npos, unable, " not found in ", logging);
         }
 
-        SUBCASE("minimal config should create listener")
+        SECTION("minimal config should create listener")
         {
             std::map<std::string, entity_value_t> config = {
                 {"protocolVersion", "HTTP1"},
@@ -136,7 +136,7 @@ TEST_CASE("Configure and start HTTP connector")
     // previous functions dropped Python GIL
     auto state = PyGILState_Ensure();
 
-    SUBCASE("empty config should fail but not crash")
+    SECTION("empty config should fail but not crash")
     {
         std::map<std::string, entity_value_t> config = {
             // empty map
