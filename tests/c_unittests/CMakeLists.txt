@@ -34,7 +34,7 @@ add_executable(c_unittests
         qdr_stubbing_probe.cpp
         c_unittests_main.cpp
         catch2/catch_amalgamated.cpp
-        doctest.h
+        catch2/catch_amalgamated.hpp
         qdr_doctest.hpp
         helpers.cpp
         helpers.hpp
