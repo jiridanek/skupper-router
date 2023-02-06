@@ -144,7 +144,7 @@ async fn test_h2spec() {
     let inspection = docker.inspect_container(&*container_skrouterd.id, Some(InspectContainerOptions { size: false })).await.unwrap();
     let hostname = inspection.network_settings.unwrap().networks.unwrap().values().take(1).next().unwrap().ip_address.as_ref().unwrap().clone();
 
-    let mut h2args = vec!["-h", &hostname, "-p", "24162", "--verbose", "--insecure", "--timeout", "10"];
+    let h2args = vec!["-h", &hostname, "-p", "24162", "--verbose", "--insecure", "--timeout", "10"];
     let container_h2spec = create_and_start_container(
         &docker, H2SPEC_IMAGE, "h2spec",
         Config {
