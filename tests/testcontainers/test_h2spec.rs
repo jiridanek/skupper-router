@@ -103,9 +103,6 @@ async fn test_h2spec() {
     let skupper_router_image = &env::var("QDROUTERD_IMAGE").unwrap_or(String::from("quay.io/skupper/skupper-router:latest"));
     println!("Using router image: {}", skupper_router_image);
 
-    // TODO(ISSUE #371) DISPATCH-1940 [http2] Router HTTP2 adaptor should pass h2spec
-    let enabled_h2spec_tests = vec!["hpack"];  // this group of tests passes, despite issue
-
     let docker = Docker::connect_with_local_defaults().unwrap();
     let network_name = "test_h2spec_network";
     let network = recreate_network(&docker, network_name).await;
@@ -148,7 +145,6 @@ async fn test_h2spec() {
     let hostname = inspection.network_settings.unwrap().networks.unwrap().values().take(1).next().unwrap().ip_address.as_ref().unwrap().clone();
 
     let mut h2args = vec!["-h", &hostname, "-p", "24162", "--verbose", "--insecure", "--timeout", "10"];
-    h2args.extend(enabled_h2spec_tests);
     let container_h2spec = create_and_start_container(
         &docker, H2SPEC_IMAGE, "h2spec",
         Config {
