@@ -1698,7 +1698,9 @@ class QdManager:
         self(cmd)
 
     def query(self, long_type):
-        return json.loads(self('QUERY --type=%s' % long_type))
+        json_result = self('QUERY --type=%s' % long_type)
+        print(f"{json_result=}")
+        return json.loads(json_result)
 
     def get_log(self, limit=None):
         cmd = 'GET-LOG'
