@@ -130,7 +130,12 @@ class QdManage():
             if k in names and hasattr(self.opts, k):
                 kwargs[k] = getattr(self.opts, k)
 
-        return getattr(self.node, method)(**kwargs)
+        result = getattr(self.node, method)(**kwargs)
+        try:
+            self.node.close()
+        except Exception:
+            pass  # The notorious Artemis maneuver for close() exception handling; may not be needed, but lets keep it dirty, but working
+        return result
 
     def call_bulk(self, func):
         """Call function for attributes from stdin or --attributes option"""
