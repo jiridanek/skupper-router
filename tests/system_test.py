@@ -1139,7 +1139,7 @@ class Tester:
     def setup(self):
         """Called from test setup and class setup."""
         if self.directory:
-            os.makedirs(self.directory)
+            os.makedirs(self.directory, exist_ok=True)
             os.chdir(self.directory)
 
     def _next_port(self) -> int:

@@ -50,6 +50,7 @@ RUN rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.
     cyrus-sasl-lib cyrus-sasl-plain cyrus-sasl-gssapi openssl \
     python3 \
     libnghttp2 libunwind \
+    curl-minimal nmap-ncat \
     gdb libasan libubsan libtsan \
     gettext hostname iputils \
     shadow-utils \
