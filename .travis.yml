@@ -18,11 +18,20 @@
 #
 
 language: c
-cache:
-  ccache: true
-  pip: true
 os: linux
 dist: focal
+
+# ccache and pip caching
+cache:
+  directories:
+    - $HOME/.ccache
+    - $HOME/.cache/pip
+
+before_script:
+  - export PATH=/usr/lib/ccache:$PATH
+
+before_cache:
+  - rm -rf $HOME/.cache/pip/log
 
 # the test matrix
 arch:
