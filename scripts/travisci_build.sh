@@ -37,8 +37,10 @@ echo 'Install additional prerequisites'
 echo '==='
 
 if [[ ${TRAVIS_CPU_ARCH} == "arm64" ]]; then
-  sudo apt-get install -y clang-12 llvm-12-dev
-  export CC=clang-12 CXX=clang++-12
+  wget https://apt.llvm.org/llvm.sh
+  chmod +x llvm.sh
+  sudo ./llvm.sh 16
+  export CC=clang-16 CXX=clang++-16
 fi
 
 # Update pip, it may prevent issues later
