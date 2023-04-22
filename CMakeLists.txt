@@ -154,11 +154,13 @@ endif(NOT DEFINED VERSION)
 
 message(STATUS "Setting skupper-router version to ${QPID_DISPATCH_VERSION}")
 
+include(CMakePrintHelpers)
 include(CheckLibraryExists)
 include(CheckSymbolExists)
 include(CheckFunctionExists)
 include(CheckIncludeFiles)
 include(CMakeDependentOption)
+include(FeatureSummary)
 
 ##
 ## Find dependencies
@@ -168,12 +170,13 @@ find_library(rt_lib rt)
 find_package(Python 3.9 REQUIRED COMPONENTS Interpreter Development)
 find_package(Threads REQUIRED)
 find_package(Proton 0.39.0 REQUIRED COMPONENTS Core Proactor Tls)
-message(STATUS "Found Proton: ${Proton_LIBRARIES} (found version \"${Proton_VERSION}\")" )
+get_target_property(Proton_LOCATION Proton::qpid-proton LOCATION)
+message(STATUS "Found Proton: ${Proton_LOCATION} (found version \"${Proton_VERSION}\")" )
 
 # http2 support
 find_package(libnghttp2 1.33.0 REQUIRED)
 # Web Sockets
-find_package(LibWebSockets 4.0.1 REQUIRED)
+find_package(libwebsockets 4.0.1 REQUIRED)
 
 ##
 ## Optional dependencies
@@ -244,9 +247,6 @@ endif()
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/include
-    ${Proton_Proactor_INCLUDE_DIRS}
-    ${Proton_Core_INCLUDE_DIRS}
-    ${Python_INCLUDE_DIRS}
     )
 
 # Originally from the LLVM project, https://opensource.apple.com/source/llvmCore/llvmCore-2358.3/CMakeLists.txt.auto.html
@@ -344,3 +344,8 @@ add_subdirectory(docs)
 # That will force automatic re-configure and everybody will be happy.
 #
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/reconfigure.in ${CMAKE_CURRENT_BINARY_DIR}/reconfigure)
+
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    feature_summary(WHAT ENABLED_FEATURES DISABLED_FEATURES PACKAGES_FOUND)
+endif()
