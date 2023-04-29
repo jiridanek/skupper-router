@@ -80,6 +80,10 @@ pushd qpid-proton/build
   cmake --build . --target install -- -j $NPROC
 popd
 
+# e.g. python/dist/python_qpid_proton-0.39.0.dev0-cp38-abi3-linux_ppc64le.whl
+python_qpid_proton=$(find qpid-proton/build python/dist/python_qpid_proton-*-*-abi3-*.whl)
+python3 -m pip install --user "${python_qpid_proton}"
+
 source qpid-proton/build/config.sh
 
 echo '==='
