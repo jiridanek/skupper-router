@@ -74,6 +74,7 @@ jobs:
 addons:
   apt:
     packages:
+      - zsh
       # Proton requirements
       - cmake
       - libpython3-dev
