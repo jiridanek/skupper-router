@@ -97,8 +97,5 @@ addons:
 
 script:
   - ulimit -c unlimited
-  - bash --version
-  - zsh scripts/travisci_build.sh
-  - set -x
   - bash -x scripts/travisci_build.sh 2>&1
   - find -name 'core' -exec ${TRAVIS_BUILD_DIR}/scripts/gha_analyze_coredump.sh {} \;

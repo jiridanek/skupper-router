@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
-set -v
-set -Eeuo pipefail
-
-echo baf
-
-exit 0
+set -Eexuo pipefail
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
