@@ -22,7 +22,6 @@ cache:
   ccache: true
   pip: true
 os: linux
-dist: focal
 
 # the test matrix
 arch:
@@ -40,11 +39,34 @@ env:
 jobs:
   fast_finish: true
   allow_failures:
-    - arch: arm64
     - arch: ppc64le
-  exclude:
-    - arch: s390x
-      env: RUNTIME_CHECK=tsan QD_ENABLE_ASSERTIONS=OFF
+  include:
+    - dist: jammy
+      arch: arm64
+      env:
+        - RUNTIME_CHECK=asan
+        - QD_ENABLE_ASSERTIONS=ON
+    - dist: jammy
+      arch: arm64
+      env:
+        - RUNTIME_CHECK=tsan
+        - QD_ENABLE_ASSERTIONS=OFF
+    - dist: focal
+      arch: ppc64le
+      env:
+        - RUNTIME_CHECK=asan
+        - QD_ENABLE_ASSERTIONS=ON
+    - dist: focal
+      arch: ppc64le
+      env:
+        - RUNTIME_CHECK=tsan
+        - QD_ENABLE_ASSERTIONS=OFF
+    - dist: focal
+      arch: s390x
+      env:
+        - RUNTIME_CHECK=asan
+        - QD_ENABLE_ASSERTIONS=ON
+    # intentionally leaving out s390x RUNTIME_CHECK=tsan QD_ENABLE_ASSERTIONS=OFF
 
 addons:
   apt:
@@ -56,7 +78,6 @@ addons:
       - libsasl2-dev
       - libssl-dev
       - sasl2-bin
-      - swig
       # Dispatch requirements
       - libnghttp2-dev
       - libwebsockets-dev
