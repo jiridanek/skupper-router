@@ -84,8 +84,6 @@ popd
 python_qpid_proton=$(find qpid-proton/build python/dist/python_qpid_proton-*-*-abi3-*.whl)
 python3 -m pip install --user "${python_qpid_proton}"
 
-source qpid-proton/build/config.sh
-
 echo '==='
 echo "Build skupper-router and run tests"
 echo '==='
