@@ -57,12 +57,14 @@ jobs:
       env:
         - RUNTIME_CHECK=tsan
         - QD_ENABLE_ASSERTIONS=OFF
+        - CMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
 
     - dist: focal
       arch: s390x
       env:
         - RUNTIME_CHECK=asan
         - QD_ENABLE_ASSERTIONS=ON
+        - CMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
 
     # intentionally leaving out s390x RUNTIME_CHECK=tsan QD_ENABLE_ASSERTIONS=OFF
 
