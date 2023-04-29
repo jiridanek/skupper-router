@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -Exeuo pipefail
+set -x
+set -Eeuo pipefail
 
 #
 # Licensed to the Apache Software Foundation (ASF) under one
