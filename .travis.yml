@@ -97,5 +97,6 @@ addons:
 
 script:
   - ulimit -c unlimited
+  # workaround Travis issue where on ppc64le stderr is not logged
   - bash -x scripts/travisci_build.sh 2>&1
   - find -name 'core' -exec ${TRAVIS_BUILD_DIR}/scripts/gha_analyze_coredump.sh {} \;
