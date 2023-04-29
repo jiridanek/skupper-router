@@ -67,6 +67,7 @@ jobs:
       env:
         - RUNTIME_CHECK=asan
         - QD_ENABLE_ASSERTIONS=ON
+        - CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
 
     # intentionally leaving out s390x RUNTIME_CHECK=tsan QD_ENABLE_ASSERTIONS=OFF
 
