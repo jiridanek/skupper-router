@@ -99,5 +99,5 @@ script:
   - bash --version
   - zsh scripts/travisci_build.sh
   - set -x
-  - bash scripts/travisci_build.sh
+  - bash -x scripts/travisci_build.sh
   - find -name 'core' -exec ${TRAVIS_BUILD_DIR}/scripts/gha_analyze_coredump.sh {} \;
