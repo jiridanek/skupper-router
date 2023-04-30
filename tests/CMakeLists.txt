@@ -75,7 +75,7 @@ set(USE_BWRAP OFF CACHE BOOL "Wrap test executions with bwrap (https://github.co
 if(USE_BWRAP)
   set(BWRAP_ARGS bwrap --bind / / --unshare-net --dev /dev --die-with-parent --)
 else()
-  set(BWRAP_ARGS "")
+  set(BWRAP_ARGS timeout -s SIGABRT 450s --)
 endif()
 set(TEST_WRAP ${BWRAP_ARGS} ${Python_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py)
 
