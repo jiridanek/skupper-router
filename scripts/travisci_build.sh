@@ -38,6 +38,7 @@ DISPATCH_CMAKE_ARGS=" \
  -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=${CMAKE_INTERPROCEDURAL_OPTIMIZATION} \
  -DDISPATCH_TEST_TIMEOUT=500 \
  -DSANITIZE_PYTHON=OFF \
+ -DPYTHON_TEST_COMMAND='-m;pytest;-vs;--timeout=400;--junit-prefix=pytest.\${py_test_module};--junit-xml=junitxmls/\${py_test_module}.xml;--pyargs;\${py_test_module}' \
 "
 DISPATCH_CTEST_EXTRA='-E ^python-checker$'
 export NPROC=3
