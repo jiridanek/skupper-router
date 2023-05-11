@@ -48,21 +48,21 @@ jobs:
         - QD_ENABLE_ASSERTIONS=OFF
         - CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
 
-    - dist: focal
+    - dist: jammy
       arch: ppc64le
       env:
         - RUNTIME_CHECK=asan
         - QD_ENABLE_ASSERTIONS=ON
         - CMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
 
-    - dist: focal
+    - dist: jammy
       arch: ppc64le
       env:
         - RUNTIME_CHECK=tsan
         - QD_ENABLE_ASSERTIONS=OFF
         - CMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
 
-    - dist: focal
+    - dist: jammy
       arch: s390x
       env:
         - RUNTIME_CHECK=asan
