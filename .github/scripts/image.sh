@@ -29,16 +29,28 @@ if [ -z "$PROJECT_TAG" ]; then
   PROJECT_TAG=main
 fi
 
-# Building the skupper-router image
+PLATFORMS="linux/amd64,linux/arm64/v8,linux/s390x"
+buildah build --jobs=4 --platform=$platarch --manifest shazam .
+
+# Building the skupper-router images
 # Pass the VERSION as a build argument so Containerfile can use it when calling compile.sh
 # This version is passed in as a -DVERSION build parameter when building skupper-router.
-${CONTAINER} build --build-arg VERSION=$VERSION -t ${PROJECT_NAME}:${PROJECT_TAG}  -f ./Containerfile .
+${CONTAINER} manifest create ${PROJECT_NAME}:${PROJECT_TAG}
+for arch in "${ARCHES[@]}"; do
+  ${CONTAINER} build --arch=${arch} --build-arg VERSION=$VERSION -t ${PROJECT_NAME}:${PROJECT_TAG}.${arch}  -f ./Containerfile .
+  ${CONTAINER} manifest add ${PROJECT_NAME}:${PROJECT_TAG} ${PROJECT_NAME}:${PROJECT_TAG}.${arch}
+done
 
 # Pushing only when credentials available
 if [[ -n "${CONTAINER_USER}" && -n "${CONTAINER_PASSWORD}" ]]; then
     ${CONTAINER} login -u ${CONTAINER_USER} -p ${CONTAINER_PASSWORD} ${CONTAINER_REGISTRY}
-    ${CONTAINER} tag ${PROJECT_NAME}:${PROJECT_TAG} ${CONTAINER_REGISTRY}/${CONTAINER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}
-    ${CONTAINER} push ${CONTAINER_REGISTRY}/${CONTAINER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}
+    ${CONTAINER} manifest create ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}
+    for arch in "${ARCHES[@]}"; do
+      ${DOCKER} tag ${PROJECT_NAME}:${PROJECT_TAG}.${arch} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}.${arch}
+      ${DOCKER} push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}.${arch}
+      ${DOCKER} manifest add ${DOCKER_REGISTRY}/${DOCKER_ORG}/${PROJECT_NAME}:${PROJECT_TAG} ${CONTAINER_REGISTRY}/${CONTAINER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}.${arch}
+    done
+    ${CONTAINER} manifest push ${CONTAINER_REGISTRY}/${CONTAINER_ORG}/${PROJECT_NAME}:${PROJECT_TAG}
 
     # PUSH_LATEST environment variable is exported only in release.yml
     # Only when an actual release tag (for e.g. 2.1.0) is pushed, we push the :latest.

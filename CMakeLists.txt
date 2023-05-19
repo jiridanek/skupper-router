@@ -141,6 +141,23 @@ find_library(rt_lib rt)
 
 find_package(Python 3.6.8 REQUIRED COMPONENTS Interpreter Development)
 find_package(Threads REQUIRED)
+
+set (PROTON_SOURCE_DIR /home/jdanek/repos/qpid/qpid-proton)
+# configure Proton build
+set (BUILD_TLS ON)
+set (SSL_IMPL openssl)
+set (BUILD_STATIC_LIBS ON)
+set (BUILD_BINDINGS proton)
+#add_subdirectory(${PROTON_SOURCE_DIR} cmake-build-proton)
+
+#find_package(Proton 0.38.0 REQUIRED COMPONENTS Core Proactor Tls)
+#get_target_property(Proton_LOCATION Proton::qpid-proton LOCATION)
+#message(STATUS "Found Proton: ${Proton_LOCATION} (found version \"${Proton_VERSION}\")" )
+
+# neither libnghttp2 nor libwebsocket Fedora packages contain configs for CMake find_package
+# use pkgconfig to find these libraries, since that is the most portable on Linux and the easiest
+#find_package(PkgConfig REQUIRED)
+
 find_package(Proton 0.38.0 REQUIRED COMPONENTS Core Proactor Tls)
 message(STATUS "Found Proton: ${Proton_LIBRARIES} (found version \"${Proton_VERSION}\")" )
 
