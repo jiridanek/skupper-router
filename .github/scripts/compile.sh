@@ -149,7 +149,7 @@ python3 -m pip install -r "${SKUPPER_DIR}"/requirements-dev.txt
 do_build "" OFF
 
 # Install Proton Python
-python3 -m pip install --prefix="$PROTON_INSTALL_DIR/usr" "$(find "$PROTON_BUILD_DIR/python/" -name 'python-qpid-proton-*.tar.gz')"
+python3 -m pip install --ignore-installed --prefix="$PROTON_INSTALL_DIR/usr" "$(find "$PROTON_BUILD_DIR/python/" -name 'python-qpid-proton-*.tar.gz')"
 
 # Then perform sanitized builds of Proton and the Router.
 # talking to annobin is not straightforward, https://bugzilla.redhat.com/show_bug.cgi?id=1536569
