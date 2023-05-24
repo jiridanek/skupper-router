@@ -52,7 +52,7 @@ if (ENABLE_PROFILE_GUIDED_OPTIMIZATION)
 
             # Feed the profile data we created from the above test runs using the -fprofile-use compiler option.
             # Use the -fprofile-correction option to smoothen the counter updates when using multi-threaded applications.
-            COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR} -DC_EXTRA_GNU=-fprofile-use=${CMAKE_BINARY_DIR}/profile-data\\\;-fprofile-correction
+            COMMAND ${CMAKE_COMMAND} ${CMAKE_BINARY_DIR} -DC_EXTRA_GNU=-fprofile-use=${CMAKE_BINARY_DIR}/profile-data\\\;-fprofile-correction\\\;-fprofile-partial-training
             COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target skrouterd
 
             # Set back the ENABLE_PROFILE_GUIDED_OPTIMIZATION=ON, so can leave it same as when we started the build.
