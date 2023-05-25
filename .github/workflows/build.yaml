@@ -912,7 +912,6 @@ jobs:
 
       - name: Build Containerfile
         run: |
-          sudo apt-get -y install podman
           podman build -t local/skupper-router:local -f ./Containerfile .
 
       # When rustup is updated, it tries to replace its binary, which on Windows is somehow locked.
