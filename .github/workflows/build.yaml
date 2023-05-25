@@ -814,6 +814,11 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - name: Start podman service
+        run: |
+          systemctl --user enable --now podman.socket
+          echo "DOCKER_HOST=unix:///run/user/${UID}/podman/podman.sock" >> $GITHUB_ENV
+
       - name: Compile and run .rs tests
         run: |
           cargo check
