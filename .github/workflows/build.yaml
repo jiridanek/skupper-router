@@ -812,7 +812,7 @@ jobs:
       - name: Build Containerfile
         run: |
           export BUILDAH_FORMAT=docker
-          podman build --platform={{ matrix.platform }} -t local/skupper-router:local -f ./Containerfile .
+          podman build --platform=${{ matrix.platform }} -t local/skupper-router:local -f ./Containerfile .
 
       # When rustup is updated, it tries to replace its binary, which on Windows is somehow locked.
       # This can result in a CI failure, see: https://github.com/rust-lang/rustup/issues/3029
