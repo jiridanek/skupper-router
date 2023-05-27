@@ -797,13 +797,22 @@ jobs:
   container:
     name: Container image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # https://github.com/containerd/containerd/blob/v1.7.1/platforms/platforms.go#L63
+        platform: ['linux/amd64/v2', 'linux/arm64/v8']
     steps:
 
       - uses: actions/checkout@v3
 
+      - name: Enable qemu to build foreign architectures
+        if: matrix.platform != 'linux/amd64/v2'
+        run: podman run --privileged --rm docker.io/tonistiigi/binfmt --install all
+
       - name: Build Containerfile
         run: |
-          podman build -t local/skupper-router:local -f ./Containerfile .
+          export 
+          podman build --platform={{ matrix.platform }} -t local/skupper-router:local -f ./Containerfile .
 
       # When rustup is updated, it tries to replace its binary, which on Windows is somehow locked.
       # This can result in a CI failure, see: https://github.com/rust-lang/rustup/issues/3029
