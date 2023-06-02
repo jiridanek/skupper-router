@@ -40,8 +40,24 @@ jobs:
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
-    - name: Checkout repository
+    - name: Checkout router repository
       uses: actions/checkout@v3
+
+    - name: Checkout Proton repository
+      uses: actions/checkout@v3
+      with:
+        repository: apache/qpid-proton
+        ref: main
+        path: 'qpid-proton'
+
+    - name: Install Proton
+      run: |
+        cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+        cmake --build qpid-proton/install
+        sudo cmake --install qpid-proton/install
+
+    - name: Delete Proton
+      run: rm -rf qpid-proton
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
