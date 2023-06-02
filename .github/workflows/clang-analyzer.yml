@@ -69,7 +69,7 @@ jobs:
     - name: Create compilation database
       run: |
         sudo pip3 install codechecker
-        cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        cmake -S . -B build -DBUILD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         # -DBUILD_TESTING=OFF
         CodeChecker analyze build/compile_commands.json -o ./reports
         CodeChecker parse --print-steps ./reports
