@@ -9,7 +9,7 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
-name: "clang-analyzer"
+name: "gcc-fanalyzer"
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
       security-events: write
 
     container:
-      image: 'quay.io/fedora/rawhide'
+      image: 'quay.io/fedora/fedora:rawhide'
 
     steps:
 
