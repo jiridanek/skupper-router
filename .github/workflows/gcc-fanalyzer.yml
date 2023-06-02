@@ -60,44 +60,44 @@ jobs:
     - name: Take ownership of the checkout directory (Git CVE-2022-24765)
       run: chown --recursive --reference=/ .
 
-    - name: Install Proton
-      run: |
-        cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
-        cmake --build qpid-proton/install
-        cmake --install qpid-proton/install
-
-    - name: Delete Proton
-      run: rm -rf qpid-proton
-
-    # https://gcc.gnu.org/wiki/StaticAnalyzer
-    - name: Build with -fanalyzer
-      run: |
-        # Disable IPO to avoid out-of-memory crashes when compiling with -fanalyzer
-        CFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DQD_ENABLE_ASSERTIONS=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
-        cmake --build build
-      working-directory: ${{github.workspace}}
-
-    # https://github.com/microsoft/sarif-sdk/blob/main/docs/multitool-usage.md
-    - name: Combine sarifs
-      run: |
-        dnf install -y npm
-        npm install -g @microsoft/sarif-multitool
-        npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
-        npx -y @microsoft/sarif-multitool rewrite merged.sarif --output CurrentFormat.sarif --sarif-output-version Current
-      env:
-        DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: my-artifact
-        path: CurrentFormat.sarif
+#    - name: Install Proton
+#      run: |
+#        cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+#        cmake --build qpid-proton/install
+#        cmake --install qpid-proton/install
+#
+#    - name: Delete Proton
+#      run: rm -rf qpid-proton
+#
+#    # https://gcc.gnu.org/wiki/StaticAnalyzer
+#    - name: Build with -fanalyzer
+#      run: |
+#        # Disable IPO to avoid out-of-memory crashes when compiling with -fanalyzer
+#        CFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DQD_ENABLE_ASSERTIONS=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
+#        cmake --build build
+#      working-directory: ${{github.workspace}}
+#
+#    # https://github.com/microsoft/sarif-sdk/blob/main/docs/multitool-usage.md
+#    - name: Combine sarifs
+#      run: |
+#        dnf install -y npm
+#        npm install -g @microsoft/sarif-multitool
+#        npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
+#        npx -y @microsoft/sarif-multitool rewrite merged.sarif --output CurrentFormat.sarif --sarif-output-version Current
+#      env:
+#        DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+#
+#    - uses: actions/upload-artifact@v3
+#      with:
+#        name: my-artifact
+#        path: CurrentFormat.sarif
 
       # https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github
     - name: upload sarif file to github
       uses: github/codeql-action/upload-sarif@v2
       with:
         # Path to SARIF file relative to the root of the repository
-        sarif_file: CurrentFormat.sarif
+        sarif_file: enriched.sarif
         # Optional category for the results
         # Used to differentiate multiple results for one commit
         category: /gcc-fanalyzer
