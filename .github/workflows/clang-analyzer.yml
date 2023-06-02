@@ -47,6 +47,9 @@ jobs:
         ref: main
         path: 'qpid-proton'
 
+    - name: Take ownership of the checkout directory (Git CVE-2022-24765)
+      run: chown --recursive --reference=/ .
+
     - name: Install latest llvm
       run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - name: Install cppcheck
@@ -73,6 +76,7 @@ jobs:
         cmake -S . -B build -DBUILD_TESTING=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         # perform build so that generated sources get generated
         cmake --build build
+        # return code 2 seems to mean issues were found, return code 3 means some checkers failed to run
         CodeChecker analyze build/compile_commands.json -o ./reports || true
         CodeChecker parse --print-steps ./reports
         CodeChecker parse --print-steps --export html --output report_html ./reports
