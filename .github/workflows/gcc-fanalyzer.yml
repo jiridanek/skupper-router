@@ -57,6 +57,9 @@ jobs:
         ref: main
         path: 'qpid-proton'
 
+    - name: Take ownership of the checkout directory (Git CVE-2022-24765)
+      run: chown --recursive --reference=/ .
+
     - name: Install Proton
       run: |
         cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF

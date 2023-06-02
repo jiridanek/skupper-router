@@ -47,9 +47,6 @@ jobs:
         ref: main
         path: 'qpid-proton'
 
-    - name: Take ownership of the checkout directory (Git CVE-2022-24765)
-      run: chown --recursive --reference=/ .
-
     - name: Install latest llvm
       run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - name: Install cppcheck
