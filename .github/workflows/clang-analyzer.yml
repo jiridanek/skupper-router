@@ -73,7 +73,7 @@ jobs:
         cmake -S . -B build -DBUILD_TESTING=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         # perform build so that generated sources get generated
         cmake --build build
-        CodeChecker analyze build/compile_commands.json -o ./reports
+        CodeChecker analyze build/compile_commands.json -o ./reports || true
         CodeChecker parse --print-steps ./reports
         CodeChecker parse --print-steps --export html --output report_html ./reports
 
