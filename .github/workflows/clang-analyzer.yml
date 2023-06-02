@@ -73,9 +73,10 @@ jobs:
         cmake -S . -B build -DBUILD_TESTING=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
         # perform build so that generated sources get generated
         cmake --build build
+        CodeChecker analyze build/compile_commands.json -o ./reports
         # return code 2 seems to mean issues were found, return code 3 means some checkers failed to run
-        CodeChecker analyze build/compile_commands.json -o ./reports || true
-        CodeChecker parse --print-steps ./reports
+        # print readable textual output of results
+        CodeChecker parse --print-steps ./reports || true
         CodeChecker parse --print-steps --export html --output report_html ./reports
 
     # See example workflow from https://github.com/skupperproject/skupper-router/settings/pages
