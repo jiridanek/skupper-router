@@ -83,9 +83,13 @@ jobs:
         npm install -g @microsoft/sarif-multitool
         npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
         npx -y @microsoft/sarif-multitool rewrite merged.sarif --output CurrentFormat.sarif --sarif-output-version Current
-
       env:
         DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: my-artifact
+        path: CurrentFormat.sarif
 
       # https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github
     - name: upload sarif file to github
