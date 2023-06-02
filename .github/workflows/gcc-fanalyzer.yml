@@ -73,7 +73,7 @@ jobs:
     - name: Build with -fanalyzer
       run: |
         # Disable IPO to avoid out-of-memory crashes when compiling with -fanalyzer
-        CFLAGS="-fanalyzer -Wno-error -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DQD_ENABLE_ASSERTIONS=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
+        CFLAGS="-fanalyzer -Wno-error" CXXFLAGS="-fanalyzer" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DQD_ENABLE_ASSERTIONS=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
         cmake --build build
 
     # https://github.com/microsoft/sarif-sdk/blob/main/docs/multitool-usage.md
