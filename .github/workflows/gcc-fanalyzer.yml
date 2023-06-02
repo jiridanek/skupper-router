@@ -1,0 +1,89 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "clang-analyzer"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '32 16 * * 4'
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    container:
+      image: 'quay.io/fedora/rawhide'
+
+    steps:
+
+    - name: Install dependencies
+      run: |
+        dnf install -y gcc gcc-c++ make cmake \
+        cyrus-sasl-devel openssl-devel libuuid-devel \
+        python3-devel python3-pip \
+        libnghttp2-devel \
+        wget tar patch findutils git
+
+    - name: Checkout router repository
+      uses: actions/checkout@v3
+
+    - name: Checkout Proton repository
+      uses: actions/checkout@v3
+      with:
+        repository: apache/qpid-proton
+        ref: main
+        path: 'qpid-proton'
+
+    - name: Install Proton
+      run: |
+        cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+        cmake --build qpid-proton/install
+        cmake --install qpid-proton/install
+
+    - name: Delete Proton
+      run: rm -rf qpid-proton
+
+    # https://gcc.gnu.org/wiki/StaticAnalyzer
+    - name: Build with -fanalyzer
+      run: |
+        CFLAGS="-fanalyzer -Wno-error -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
+        cmake --build build
+
+    # https://github.com/microsoft/sarif-sdk/blob/main/docs/multitool-usage.md
+    - name: Combine sarifs
+      run: |
+        dnf install -y npm
+        npm install -g @microsoft/sarif-multitool
+        npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
+      env:
+        DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
+
+      # https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github
+    - name: upload sarif file to github
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        # Path to SARIF file relative to the root of the repository
+        sarif_file: merged.sarif
+        # Optional category for the results
+        # Used to differentiate multiple results for one commit
+        category: /gcc-fanalyzer

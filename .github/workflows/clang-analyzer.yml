@@ -1,0 +1,87 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "clang-analyzer"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "main" ]
+  schedule:
+    - cron: '32 16 * * 4'
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 360
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+    - name: Checkout router repository
+      uses: actions/checkout@v3
+
+    - name: Checkout Proton repository
+      uses: actions/checkout@v3
+      with:
+        repository: apache/qpid-proton
+        ref: main
+        path: 'qpid-proton'
+
+    - name: Install latest llvm
+      run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+    - name: Install cppcheck
+      run: sudo apt install -y cppcheck
+
+    - name: Install dependencies
+      run: |
+        sudo apt update; sudo apt install -y libdw-dev swig libpython3-dev libsasl2-dev libjsoncpp-dev libwebsockets-dev libnghttp2-dev ccache ninja-build pixz libbenchmark-dev nginx
+
+    - name: Install Proton
+      run: |
+        cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+        cmake --build qpid-proton/install
+        sudo cmake --install qpid-proton/install
+
+    - name: Delete Proton
+      run: rm -rf qpid-proton
+
+    # https://clang-analyzer.llvm.org/command-line.html
+    - name: Create compilation database
+      run: |
+        sudo pip3 install codechecker
+        cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        # -DBUILD_TESTING=OFF
+        CodeChecker analyze build/compile_commands.json -o ./reports
+        CodeChecker parse --print-steps ./reports
+        CodeChecker parse --print-steps --export html --output report_html ./reports
+
+    # See example workflow from https://github.com/skupperproject/skupper-router/settings/pages
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: 'report_html/'
+    - name: Deploy to GitHub Pages
+      id: codechecker
+      uses: actions/deploy-pages@v2
