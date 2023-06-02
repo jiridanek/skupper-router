@@ -77,7 +77,7 @@ jobs:
         # return code 2 seems to mean issues were found, return code 3 means some checkers failed to run
         # print readable textual output of results
         CodeChecker parse --print-steps ./reports || true
-        CodeChecker parse --print-steps --export html --output report_html ./reports
+        CodeChecker parse --print-steps --export html --output report_html ./reports || true
 
     # See example workflow from https://github.com/skupperproject/skupper-router/settings/pages
     - name: Setup Pages
