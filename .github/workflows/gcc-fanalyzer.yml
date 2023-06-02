@@ -33,9 +33,6 @@ jobs:
 
     container:
       image: 'quay.io/fedora/fedora:rawhide'
-      volumes:
-        - ${{github.workspace}}:${{github.workspace}}
-      options: --privileged --ulimit core=-1 --security-opt apparmor:unconfined --security-opt seccomp=unconfined --sysctl net.ipv6.conf.all.disable_ipv6=0
 
     steps:
 
@@ -44,7 +41,7 @@ jobs:
         dnf install -y gcc gcc-c++ make cmake \
         cyrus-sasl-devel openssl-devel libuuid-devel \
         python3-devel python3-pip \
-        libnghttp2-devel \
+        libnghttp2-devel libwebsockets-devel \
         wget tar patch findutils git
 
     - name: Checkout router repository
