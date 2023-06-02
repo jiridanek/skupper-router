@@ -66,6 +66,7 @@ jobs:
     # https://gcc.gnu.org/wiki/StaticAnalyzer
     - name: Build with -fanalyzer
       run: |
+        # Disable IPO to avoid out-of-memory crashes when compiling with -fanalyzer
         CFLAGS="-fanalyzer -Wno-error -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
         cmake --build build
 

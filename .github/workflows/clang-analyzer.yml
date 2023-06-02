@@ -69,8 +69,10 @@ jobs:
     - name: Create compilation database
       run: |
         sudo pip3 install codechecker
-        cmake -S . -B build -DBUILD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        # -DBUILD_TESTING=OFF
+        # disable IPO to make compilation faster
+        cmake -S . -B build -DBUILD_TESTING=OFF -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        # perform build so that generated sources get generated
+        cmake --build build
         CodeChecker analyze build/compile_commands.json -o ./reports
         CodeChecker parse --print-steps ./reports
         CodeChecker parse --print-steps --export html --output report_html ./reports
