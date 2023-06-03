@@ -27,7 +27,7 @@ def main():
         prog='gha_sarif_masher',
         description='Processes SARIF files from GCC so that GitHub Actions ingest them.',
         epilog='This complements @microsoft/sarif-multitool with additional transformations.')
-    parser.add_argument('filename', required=True, type=argparse.FileType('rt'))
+    parser.add_argument('filename', type=argparse.FileType('rt'))
     parser.add_argument('--output', required=True, type=argparse.FileType('wt'))
     parser.add_argument('--basedir', required=True)
 
