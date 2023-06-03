@@ -1,7 +1,9 @@
 # SARIF (Static Analysis Results Interchange Format)
 
-Format based on JSON, captures warning messages from software tools that work with sourcecode.
-Most importantly it can hold findings from security scanners.
+[Introduction from Microsoft](https://github.com/microsoft/sarif-tutorials).
+
+SARIF is a format based on JSON, used to capture warning messages from software tools that work with sourcecode.
+Most importantly it can hold compiler warnings and findings from security scanners.
 GitHub can then import these and maintain a browsable database of outstanding ones.
 
 ## Helpful tooling
