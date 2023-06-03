@@ -1,0 +1,12 @@
+# SARIF (Static Analysis Results Interchange Format)
+
+Format based on JSON, captures warning messages from software tools that work with sourcecode.
+Most importantly it can hold findings from security scanners.
+GitHub can then import these and maintain a browsable database of outstanding ones.
+
+## Helpful tooling
+
+- [SARIF validator](https://sarifweb.azurewebsites.net/Validation)
+- [SARIF multitool for merging and manipulating .sarif files](https://github.com/microsoft/sarif-sdk/blob/main/docs/multitool-usage.md)
+  - [GitHub action to invoke the tool](https://github.com/marketplace/actions/sarif-multitool)
+- [GitHub documentation about importing SARIF results](https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github)
