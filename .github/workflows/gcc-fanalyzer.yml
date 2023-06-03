@@ -41,7 +41,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        dnf install -y gcc gcc-c++ make cmake \
+        dnf install -y gcc gcc-c++ ninja-build cmake \
         cyrus-sasl-devel openssl-devel libuuid-devel \
         python3-devel python3-pip \
         libnghttp2-devel libwebsockets-devel \
@@ -62,7 +62,7 @@ jobs:
 
     - name: Install Proton
       run: |
-        cmake -S qpid-proton -B qpid-proton/install -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+        cmake -S qpid-proton -B qpid-proton/install -GNinja -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
         cmake --build qpid-proton/install
         cmake --install qpid-proton/install
 
@@ -73,7 +73,7 @@ jobs:
     - name: Build with -fanalyzer
       run: |
         # Disable IPO to avoid out-of-memory crashes when compiling with -fanalyzer
-        CFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -DENABLE_WARNING_ERROR=OFF -DQD_ENABLE_ASSERTIONS=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
+        CFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" CXXFLAGS="-fanalyzer -fdiagnostics-format=sarif-file" cmake -S . -B build -GNinja -DENABLE_WARNING_ERROR=OFF -DQD_ENABLE_ASSERTIONS=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DBUILD_TESTING=OFF
         cmake --build build
       working-directory: ${{github.workspace}}
 
