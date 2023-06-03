@@ -83,8 +83,8 @@ jobs:
         dnf install -y npm
         npm install -g @microsoft/sarif-multitool
         # npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
-        npx -y @microsoft/sarif-multitool rebaseuri enriched.sarif --base-path-value "${{github.workspace}}" --base-path-token REPO
-        npx -y @microsoft/sarif-multitool rewrite merged.sarif --normalize-for-ghas --output rewritten.sarif --sarif-output-version Current
+        python3 scripts/gha_sarif_masher.py --basedir "${{github.workspace}}" --output mashed.sarif enriched.sarif
+        npx -y @microsoft/sarif-multitool rewrite mashed.sarif --normalize-for-ghas --output current.sarif --sarif-output-version Current
       env:
         DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
 
@@ -98,7 +98,7 @@ jobs:
       uses: github/codeql-action/upload-sarif@v2
       with:
         # Path to SARIF file relative to the root of the repository
-        sarif_file: enriched.sarif
+        sarif_file: current.sarif
         # Optional category for the results
         # Used to differentiate multiple results for one commit
         category: /gcc-fanalyzer
