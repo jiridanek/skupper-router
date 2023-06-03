@@ -29,6 +29,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      # https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security
       security-events: write
 
     container:
@@ -62,9 +63,9 @@ jobs:
 
     - name: Install Proton
       run: |
-        cmake -S qpid-proton -B qpid-proton/install -GNinja -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
-        cmake --build qpid-proton/install
-        cmake --install qpid-proton/install
+        cmake -S qpid-proton -B qpid-proton/build -GNinja -DBUILD_BINDINGS=c -DBUILD_TLS=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+        cmake --build qpid-proton/build
+        cmake --install qpid-proton/build
 
     - name: Delete Proton
       run: rm -rf qpid-proton
