@@ -82,7 +82,7 @@ jobs:
       run: |
         dnf install -y npm
         npm install -g @microsoft/sarif-multitool
-#        npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
+        # npx -y @microsoft/sarif-multitool merge $(find build/ -name '*.sarif') --recurse --output-file merged.sarif
         npx -y @microsoft/sarif-multitool rebaseuri enriched.sarif --base-path-value "${{github.workspace}}" --base-path-token REPO
         npx -y @microsoft/sarif-multitool rewrite merged.sarif --normalize-for-ghas --output rewritten.sarif --sarif-output-version Current
       env:
