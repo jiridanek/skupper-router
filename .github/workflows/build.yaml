@@ -43,7 +43,7 @@ env:
 jobs:
   compile:
     name: "Compile (${{matrix.os}}, ${{matrix.runtimeCheck}}, proton ${{matrix.protonGitRef}})"
-    runs-on: ["${{ matrix.os }}", "linux", "x64"]
+    runs-on: ["${{ matrix.os }}", "Linux"]
     strategy:
       fail-fast: false
       matrix:
