@@ -101,11 +101,14 @@ jobs:
         if: ${{ ! cancelled() }}
         # https://aquasecurity.github.io/trivy/v0.43/getting-started/installation/#use-container-image
         run: |
-          mkdir -p $HOME/.cache
-          podman run --rm --volume ${PODMAN_SOCK}:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ docker.io/aquasec/trivy:latest \
-            image --ignore-unfixed --exit-code=1 ${{ env.ImageName }}
-          podman run --rm --volume ${PODMAN_SOCK}:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ docker.io/aquasec/trivy:latest \
-            image --scanners secret --exit-code=1 ${{ env.ImageName }}
+          podman run --rm \
+            -v ${PODMAN_SOCK}:/var/run/docker.sock \
+            -v ${{github.workspace}}:${{github.workspace}} \
+            docker.io/aquasec/trivy:latest \
+              image \
+              --scanners vuln,secret --ignore-unfixed --exit-code=1 \
+              --secret-config=${{github.workspace}}/.github/trivy-secret.yaml \
+              ${{ env.ImageName }}
 
       - name: Run Grype security scan on the image
         if: ${{ ! cancelled() }}
