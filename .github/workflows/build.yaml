@@ -101,6 +101,7 @@ jobs:
         if: ${{ ! cancelled() }}
         # https://aquasecurity.github.io/trivy/v0.43/getting-started/installation/#use-container-image
         run: |
+          mkdir -p $HOME/.cache
           podman run --rm --volume ${PODMAN_SOCK}:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ docker.io/aquasec/trivy:latest \
             image --scanners secret --exit-code=1 ${{ env.ImageName }}
 
