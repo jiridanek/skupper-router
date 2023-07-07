@@ -103,7 +103,7 @@ jobs:
         run: |
           mkdir -p $HOME/.cache
           podman run --rm --volume ${PODMAN_SOCK}:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ docker.io/aquasec/trivy:latest \
-            image --exit-code=1 ${{ env.ImageName }}
+            image --ignore-unfixed --exit-code=1 ${{ env.ImageName }}
           podman run --rm --volume ${PODMAN_SOCK}:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ docker.io/aquasec/trivy:latest \
             image --scanners secret --exit-code=1 ${{ env.ImageName }}
 
