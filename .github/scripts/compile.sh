@@ -58,13 +58,13 @@ else
   cd "${WORKING_DIR}"
 fi
 
-LWS_BUILD_DIR="${LWS_DIR}/build"
-LWS_INSTALL_DIR="${LWS_DIR}/install"
-LIBUNWIND_INSTALL_DIR="${LIBUNWIND_DIR}/install"
+LWS_BUILD_DIR="/tmp/lws_build"
+LWS_INSTALL_DIR="/tmp/lws_install"
+LIBUNWIND_INSTALL_DIR="/tmp/libuiwind_install"
 
-PROTON_INSTALL_DIR="${PROTON_DIR}/proton_install"
-PROTON_BUILD_DIR="${PROTON_DIR}/build"
-SKUPPER_BUILD_DIR="${SKUPPER_DIR}/build"
+PROTON_INSTALL_DIR="/tmp/proton_install"
+PROTON_BUILD_DIR="/tmp/proton_build"
+SKUPPER_BUILD_DIR="/tmp/skupper_build"
 
 # We are installing libwebsockets and libunwind from source
 # First, we will install these libraries in /usr/local/lib

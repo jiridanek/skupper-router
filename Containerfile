@@ -41,7 +41,7 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 
 ARG VERSION=UNKNOWN
 ENV VERSION=$VERSION
-RUN .github/scripts/compile.sh
+RUN --mount=type=tmpfs,target=/tmp .github/scripts/compile.sh
 RUN tar zxpf /qpid-proton-image.tar.gz --one-top-level=/image && tar zxpf /skupper-router-image.tar.gz --one-top-level=/image && tar zxpf /libwebsockets-image.tar.gz --one-top-level=/image && tar zxpf /libunwind-image.tar.gz --one-top-level=/image
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
