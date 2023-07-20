@@ -51,32 +51,26 @@ Summary:       The skrouterd router daemon for Skupper.io
 License:       ASL 2.0
 URL:           https://skupper.io
 
-%{?fedora:Requires: python3 >= %{python_minimum_version}}
-%{?fedora:Requires: python3-cffi}
-%{?rhel:Requires: python39 >= %{python_minimum_version}}
-%{?rhel:Requires: python39-cffi}
+Requires: python3 >= %{python_minimum_version}}
 Requires: skupper-router-common == %{version}
 Requires: libwebsockets >= %{libwebsockets_minimum_version}
 Requires: libnghttp2 >= %{libnghttp2_minimum_version}
 Requires: cyrus-sasl-plain
 Requires: cyrus-sasl-gssapi
 Requires: libunwind >= %{libunwind_minimum_version}
+# Proton dependencies
+Requires: python3-cffi
 
 BuildRequires: gcc
 BuildRequires: gcc-c++
 BuildRequires: cmake
 
 # skupper-router requirements
-%{?fedora:BuildRequires: python3-devel >= %{python_minimum_version}}
-%{?fedora:BuildRequires: python3-setuptools}
-%{?fedora:BuildRequires: python3-pip}
+BuildRequires: python3-devel >= %{python_minimum_version}
+BuildRequires: python3-setuptools
+BuildRequires: python3-pip
 # without wheel the installed files lack `python_qpid_proton-0.37.0.dist-info`
-%{?fedora:BuildRequires: python3-wheel}
-%{?rhel:BuildRequires: python39-devel >= %{python_minimum_version}}
-%{?rhel:BuildRequires: python39-setuptools}
-%{?rhel:BuildRequires: python39-pip}
-%{?rhel:BuildRequires: python39-wheel}
-%{?rhel:BuildRequires: python39-rpm-macros}
+BuildRequires: python3-wheel
 BuildRequires: libwebsockets-devel >= %{libwebsockets_minimum_version}
 BuildRequires: libnghttp2-devel >= %{libnghttp2_minimum_version}
 BuildRequires: libunwind-devel >= %{libunwind_minimum_version}
@@ -89,8 +83,6 @@ BuildRequires: openssl
 # proton-c requirements
 BuildRequires: openssl-devel
 BuildRequires: cyrus-sasl-devel
-# python-qpid-proton requirements
-BuildRequires: swig
 
 # skupper-router sources
 Source0: packit-placeholder-value.tar.gz
