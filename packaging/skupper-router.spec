@@ -44,7 +44,7 @@
 %global libunwind_minimum_version 1.3.1
 
 Name:          skupper-router
-Version:       2.x.y
+Version:       0.0.0
 Release:       1%{?dist}
 Summary:       The skrouterd router daemon for Skupper.io
 License:       ASL 2.0
