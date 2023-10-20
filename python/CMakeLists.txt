@@ -41,7 +41,8 @@ install(CODE
         "execute_process( \
         COMMAND ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_BINARY_DIR} --ignore-installed --verbose --compile --prefix=\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX} \
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} \
-        COMMAND_ECHO STDOUT)")
+        COMMAND_ECHO STDOUT \
+        COMMAND_ERROR_IS_FATAL ANY)")
 
 install(FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/skupper_router/management/skrouter.json
