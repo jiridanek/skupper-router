@@ -922,6 +922,8 @@ jobs:
           RUSTC_WRAPPER: "sccache"
           RUST_LOG: "info"
           RUST_BACKTRACE: "1"
+          # single threaded execution makes it clearer in the logs which test is running what
+          RUST_TEST_THREADS: "1"
 
       # Trivy and Grype are the scanners that GitLab integrates with (at the time of writing)
 
