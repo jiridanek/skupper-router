@@ -903,7 +903,7 @@ jobs:
           rustup set auto-self-update disable
           rustup toolchain install stable --profile minimal
 
-      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.3
 
       - name: Start podman service
         run: |
@@ -917,9 +917,11 @@ jobs:
           cargo test -- --test-threads=1 --nocapture
         env:
           QDROUTERD_IMAGE: ${{ env.ImageName }}
-          CARGO_INCREMENTAL: 0
-          RUST_LOG: info
-          RUST_BACKTRACE: 1
+          CARGO_INCREMENTAL: "0"
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+          RUST_LOG: "info"
+          RUST_BACKTRACE: "1"
 
       # Trivy and Grype are the scanners that GitLab integrates with (at the time of writing)
 
