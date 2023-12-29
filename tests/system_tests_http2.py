@@ -1205,6 +1205,7 @@ class Http2AdaptorConnCounter(TestCase):
     Validate the HTTP/2 service connection counter
     """
     router: Qdrouterd
+
     @classmethod
     def setUpClass(cls):
         super(Http2AdaptorConnCounter, cls).setUpClass()

@@ -2521,6 +2521,7 @@ class TcpAdaptorConnCounter(TestCase):
     Validate the TCP service connection counter
     """
     router: Qdrouterd
+
     @classmethod
     def setUpClass(cls):
         super(TcpAdaptorConnCounter, cls).setUpClass()
@@ -2636,6 +2637,7 @@ class TcpAdaptorNoDelayedDelivery(TestCase):
     Ensure long lived TCP sessions are not counted as delayed deliveries
     """
     router: Qdrouterd
+
     @classmethod
     def setUpClass(cls):
         super(TcpAdaptorNoDelayedDelivery, cls).setUpClass()

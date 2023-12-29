@@ -54,7 +54,7 @@ from datetime import datetime
 from subprocess import PIPE, STDOUT, TimeoutExpired
 from threading import Event
 from threading import Thread
-from typing import Callable, TextIO, List, Optional, Tuple, Union, Type, Set, Any, TypeVar, Dict
+from typing import Callable, TextIO, List, Optional, Tuple, Type, Set, Any, TypeVar, Dict
 
 import __main__
 
