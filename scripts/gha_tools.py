@@ -17,7 +17,6 @@
 # under the License.
 #
 import io
-import sys
 import unittest
 from typing import List, Tuple, TextIO, Iterable, Union
 
@@ -61,4 +60,4 @@ class GHAToolsSelfTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    sys.exit(unittest.main())
+    unittest.main()

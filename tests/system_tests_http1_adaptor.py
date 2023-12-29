@@ -3252,6 +3252,7 @@ class Http1AdaptorConnCounter(TestCase):
     """
     Validate the HTTP1 service connection counter
     """
+    router: Qdrouterd
     @classmethod
     def setUpClass(cls):
         super(Http1AdaptorConnCounter, cls).setUpClass()

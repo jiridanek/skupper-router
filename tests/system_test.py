@@ -28,6 +28,8 @@ Features:
 - Sundry other tools.
 """
 
+from __future__ import annotations
+
 import errno
 import fcntl
 import hashlib
@@ -187,8 +189,8 @@ def retry_exception(
         timeout: float = TIMEOUT,
         delay: float = .001,
         max_delay: float = 1,
-        exception: Union[Type[Exception], Set[Type[Exception]]] = None,
-        exception_test: Callable[[Exception], Any] = None,
+        exception: Type[Exception] | Set[Type[Exception]] | None = None,
+        exception_test: Callable[[Exception], Any] | None = None,
 ) -> _T:
     """Call function until it returns without exception or timeout expires.
     Double the delay for each retry up to max_delay.
