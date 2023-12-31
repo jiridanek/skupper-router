@@ -1,27 +1,18 @@
 #ifndef __STUB_H__
 #define __STUB_H__
 
-// Copyright (c) 2019 coolxv
-//
-// Distributed under the MIT Software License
-// See accompanying file LICENSE.txt or copy at
-// https://opensource.org/licenses/MIT
-
-#include "qd_asan_interface.h"
-
-#ifdef _WIN32
+#ifdef _WIN32 
 //windows
 #include <windows.h>
 #include <processthreadsapi.h>
 #else
-//linux
+//linux or macos
 #include <unistd.h>
 #include <sys/mman.h>
 #endif
 //c
 #include <cstddef>
 #include <cstring>
-#include <cstdint>
 //c++
 #include <map>
 
@@ -31,7 +22,7 @@
 /**********************************************************
                   replace function
 **********************************************************/
-#ifdef _WIN32
+#ifdef _WIN32 
 #define CACHEFLUSH(addr, size) FlushInstructionCache(GetCurrentProcess(), addr, size)
 #else
 #define CACHEFLUSH(addr, size) __builtin___clear_cache(addr, addr + size)
@@ -41,13 +32,13 @@
     #define CODESIZE 16U
     #define CODESIZE_MIN 16U
     #define CODESIZE_MAX CODESIZE
-    // ldr x9, +8
-    // br x9
-    // addr
+    // ldr x9, +8 
+    // br x9 
+    // addr 
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
-        memcpy((long long *)(fn + 8), &fn_stub, sizeof(long long));\
+        *(long long *)(fn + 8) = (long long )fn_stub;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
@@ -56,9 +47,34 @@
     #define CODESIZE_MAX CODESIZE
     // ldr pc, [pc, #-4]
     #define REPLACE_FAR(t, fn, fn_stub)\
-        ((uint32_t*)fn)[0] = 0xe51ff004;\
-        ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
-        CACHEFLUSH((char *)fn, CODESIZE);
+        if ((uintptr_t)fn & 0x00000001) { \
+          *(uint16_t *)&f[0] = 0xf8df;\
+          *(uint16_t *)&f[2] = 0xf000;\
+          *(uint16_t *)&f[4] = (uint16_t)(fn_stub & 0xffff);\
+          *(uint16_t *)&f[6] = (uint16_t)(fn_stub >> 16);\
+        } else { \
+          ((uint32_t*)fn)[0] = 0xe51ff004;\
+          ((uint32_t*)fn)[1] = (uint32_t)fn_stub;\
+        }
+        CACHEFLUSH((char *)((uintptr_t)fn & 0xfffffffe), CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__thumb__) || defined(_M_THUMB)
+    #define CODESIZE 12
+    #define CODESIZE_MIN 12
+    #define CODESIZE_MAX CODESIZE
+    // NOP
+    // LDR.W PC, [PC]
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        uint32_t clearBit0 = fn & 0xfffffffe;\
+        char *f = (char *)clearBit0;\
+        if (clearBit0 % 4 != 0) {\
+            *(uint16_t *)&f[0] = 0xbe00;\
+        }\
+        *(uint16_t *)&f[2] = 0xf8df;\
+        *(uint16_t *)&f[4] = 0xf000;\
+        *(uint16_t *)&f[6] = (uint16_t)(fn_stub & 0xffff);\
+        *(uint16_t *)&f[8] = (uint16_t)(fn_stub >> 16);\
+        CACHEFLUSH((char *)f, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__mips64)
     #define CODESIZE 80U
@@ -107,8 +123,80 @@
         ((uint32_t *)fn)[19] = 0x00000000;\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
-#elif defined(__thumb__) || defined(_M_THUMB)
-    #error "Thumb is not supported"
+
+#elif defined(__riscv) && __riscv_xlen == 64
+    #define CODESIZE 24U
+    #define CODESIZE_MIN 24U
+    #define CODESIZE_MAX CODESIZE
+    // absolute offset(64)
+    // auipc t1,0
+    // addi t1, t1, 16
+    // ld t1,0(t1)
+    // jalr x0, t1, 0
+    // addr
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        unsigned int auipc = 0x317;\
+        *(unsigned int *)(fn) = auipc;\
+        unsigned int addi = 0x1030313;\
+        *(unsigned int *)(fn + 4) = addi;\
+        unsigned int ld = 0x33303;\
+        *(unsigned int *)(fn + 8) = ld;\
+        unsigned int jalr = 0x30067;\
+        *(unsigned int *)(fn + 12) = jalr;\
+        *(unsigned long long*)(fn + 16) = (unsigned long long)fn_stub;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+#elif defined(__riscv) && __riscv_xlen == 32
+    #define CODESIZE 20U
+    #define CODESIZE_MIN 20U
+    #define CODESIZE_MAX CODESIZE
+    // absolute offset(32)
+    // auipc t1,0
+    // addi t1, t1, 16
+    // lw t1,0(t1)
+    // jalr x0, t1, 0
+    // addr
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        unsigned int auipc = 0x317;\
+        *(unsigned int *)(fn) = auipc;\
+        unsigned int addi = 0x1030313;\
+        *(unsigned int *)(fn + 4) = addi;\
+        unsigned int lw = 0x32303;\
+        *(unsigned int *)(fn + 8) = lw;\
+        unsigned int jalr = 0x30067;\
+        *(unsigned int *)(fn + 12) = jalr;\
+        *(unsigned int*)(fn + 16) = (unsigned int)fn_stub;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+
+#elif defined(__loongarch64) 
+    #define CODESIZE 20U
+    #define CODESIZE_MIN 20U
+    #define CODESIZE_MAX CODESIZE
+    // absolute offset(64)
+    // PCADDI rd, si20 | 0 0 0 1 1 0 0 si20 rd
+    // LD.D rd, rj, si12 | 0 0 1 0 1 0 0 0 1 1 si12 rj rd
+    // JIRL rd, rj, offs | 0 1 0 0 1 1 offs[15:0] rj rd
+    // addr
+    #define REPLACE_FAR(t, fn, fn_stub)\
+        unsigned int rd = 17;\
+        unsigned int off = 12 >> 2;\
+        unsigned int pcaddi = 0x0c << (32 - 7) | off << 5 | rd ;\
+        rd = 17;\
+        int rj = 17;\
+        off = 0;\
+        unsigned int ld_d = 0xa3 << 22 | off << 10 | rj << 5 | rd ;\
+        rd = 0;\
+        rj = 17;\
+        off = 0;\
+        unsigned int jirl = 0x13 << 26 | off << 10 | rj << 5| rd;\
+        *(unsigned int *)fn = pcaddi;\
+        *(unsigned int *)(fn + 4) = ld_d;\
+        *(unsigned int *)(fn + 8) = jirl;\
+        *(unsigned long long*)(fn + 12) = (unsigned long long)fn_stub;\
+        CACHEFLUSH((char *)fn, CODESIZE);
+    #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
+
 #else //__i386__ _x86_64__  _M_IX86 _M_X64
     #define CODESIZE 13U
     #define CODESIZE_MIN 5U
@@ -116,30 +204,25 @@
     //13 byte(jmp m16:64)
     //movabs $0x102030405060708,%r11
     //jmpq   *%r11
-    #define REPLACE_FAR(t, fn, fn_stub) \
-        do{\
+    #define REPLACE_FAR(t, fn, fn_stub)\
         *fn = 0x49;\
         *(fn + 1) = 0xbb;\
-        memcpy((int *)(fn + 2), &fn_stub, sizeof(long long));\
+        *(long long *)(fn + 2) = (long long)fn_stub;\
         *(fn + 10) = 0x41;\
         *(fn + 11) = 0xff;\
         *(fn + 12) = 0xe3;\
-        }while(false)
-        //CACHEFLUSH((char *)fn, CODESIZE);
+        CACHEFLUSH((char *)fn, CODESIZE);
 
     //5 byte(jmp rel32)
     #define REPLACE_NEAR(t, fn, fn_stub)\
-        do{\
-        const int addr = fn_stub - fn - CODESIZE_MIN;\
         *fn = 0xE9;\
-        memcpy((int *)(fn + 1), &addr, sizeof(int));\
-        }while(false)
-        //CACHEFLUSH((char *)fn, CODESIZE);
+        *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);\
+        CACHEFLUSH((char *)fn, CODESIZE);
 #endif
 
 struct func_stub
 {
-    unsigned char *fn;
+    char *fn;
     unsigned char code_buf[CODESIZE];
     bool far_jmp;
 };
@@ -155,7 +238,7 @@ public:
         m_pagesize = sys_info.dwPageSize;
 #else
         m_pagesize = sysconf(_SC_PAGE_SIZE);
-#endif
+#endif       
 
         if (m_pagesize < 0)
         {
@@ -164,7 +247,11 @@ public:
     }
     ~Stub()
     {
-        std::map<unsigned char*,func_stub*>::iterator iter;
+        clear();
+    }
+    void clear()
+    {
+        std::map<char*,func_stub*>::iterator iter;
         struct func_stub *pstub;
         for(iter=m_result.begin(); iter != m_result.end(); iter++)
         {
@@ -174,7 +261,7 @@ public:
             if(0 != VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
 #else
             if (0 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif
+#endif       
             {
 
                 if(pstub->far_jmp)
@@ -186,35 +273,26 @@ public:
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
                 }
 
-#if defined(__aarch64__) || defined(_M_ARM64)
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#elif defined(__arm__) || defined(_M_ARM)
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#elif defined(__mips64)
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#else //__i386__ _x86_64__  _M_IX86 _M_X64
-                //CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#endif
+                CACHEFLUSH(pstub->fn, CODESIZE);
 
 #ifdef _WIN32
                 VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
 #else
                 mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
-#endif
+#endif     
             }
 
             iter->second  = NULL;
-            delete pstub;
+            delete pstub;        
         }
-
+        
         return;
     }
     template<typename T,typename S>
-    ATTRIBUTE_NO_SANITIZE_THREAD
     void set(T addr, S addr_stub)
     {
-        unsigned char * fn;
-        unsigned char * fn_stub;
+        char * fn;
+        char * fn_stub;
         fn = addrof(addr);
         fn_stub = addrof(addr_stub);
         struct func_stub *pstub;
@@ -239,9 +317,9 @@ public:
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif
+#endif       
         {
-            throw("stub set memory protect to w+r+x failed");
+            throw("stub set memory protect to w+r+x faild");
         }
 
         if(pstub->far_jmp)
@@ -253,42 +331,41 @@ public:
             REPLACE_NEAR(this, fn, fn_stub);
         }
 
-
 #ifdef _WIN32
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
-#endif
+#endif     
         {
             throw("stub set memory protect to r+x failed");
         }
-        m_result.insert(std::pair<unsigned char*,func_stub*>(fn,pstub));
+        m_result.insert(std::pair<char*,func_stub*>(fn,pstub));
         return;
     }
 
     template<typename T>
     void reset(T addr)
     {
-        unsigned char * fn;
+        char * fn;
         fn = addrof(addr);
-
-        std::map<unsigned char*,func_stub*>::iterator iter = m_result.find(fn);
-
+        
+        std::map<char*,func_stub*>::iterator iter = m_result.find(fn);
+        
         if (iter == m_result.end())
         {
             return;
         }
         struct func_stub *pstub;
         pstub = iter->second;
-
+        
 #ifdef _WIN32
         DWORD lpflOldProtect;
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif
+#endif       
         {
-            throw("stub reset memory protect to w+r+x failed");
+            throw("stub reset memory protect to w+r+x faild");
         }
 
         if(pstub->far_jmp)
@@ -300,52 +377,45 @@ public:
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
 
-#if defined(__aarch64__) || defined(_M_ARM64)
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#elif defined(__arm__) || defined(_M_ARM)
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#elif defined(__mips64)
-                CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#else //__i386__ _x86_64__  _M_IX86 _M_X64
-                //CACHEFLUSH((char *)pstub->fn, CODESIZE);
-#endif
+        CACHEFLUSH(pstub->fn, CODESIZE);
+
 
 #ifdef _WIN32
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
-#endif
+#endif     
         {
             throw("stub reset memory protect to r+x failed");
         }
         m_result.erase(iter);
         delete pstub;
-
+        
         return;
     }
 private:
-    char *pageof(unsigned char* addr)
-    {
+    char *pageof(char* addr)
+    { 
 #ifdef _WIN32
         return (char *)((unsigned long long)addr & ~(m_pagesize - 1));
 #else
         return (char *)((unsigned long)addr & ~(m_pagesize - 1));
-#endif
+#endif   
     }
 
     template<typename T>
-    unsigned char* addrof(T addr)
+    char* addrof(T addr)
     {
-        union
+        union 
         {
           T _s;
-          unsigned char* _d;
+          char* _d;
         }ut;
         ut._s = addr;
         return ut._d;
     }
 
-    bool distanceof(unsigned char* addr, unsigned char* addr_stub)
+    bool distanceof(char* addr, char* addr_stub)
     {
         std::ptrdiff_t diff = addr_stub >= addr ? addr_stub - addr : addr - addr_stub;
         if((sizeof(addr) > 4) && (((diff >> 31) - 1) > 0))
@@ -362,9 +432,9 @@ private:
 #else
     //LP64
     long m_pagesize;
-#endif
-    std::map<unsigned char*, func_stub*> m_result;
-
+#endif   
+    std::map<char*, func_stub*> m_result;
+    
 };
 
 
