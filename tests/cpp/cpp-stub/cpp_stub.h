@@ -34,11 +34,11 @@
     #define CODESIZE_MAX CODESIZE
     // ldr x9, +8 
     // br x9 
-    // addr 
+    // addr
     #define REPLACE_FAR(t, fn, fn_stub)\
         ((uint32_t*)fn)[0] = 0x58000040 | 9;\
         ((uint32_t*)fn)[1] = 0xd61f0120 | (9 << 5);\
-        *(long long *)(fn + 8) = (long long )fn_stub;\
+        memcpy((long long *)(fn + 8), &fn_stub, sizeof(long long));\
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 #elif defined(__arm__) || defined(_M_ARM)
@@ -169,7 +169,7 @@
         CACHEFLUSH((char *)fn, CODESIZE);
     #define REPLACE_NEAR(t, fn, fn_stub) REPLACE_FAR(t, fn, fn_stub)
 
-#elif defined(__loongarch64) 
+#elif defined(__loongarch64)
     #define CODESIZE 20U
     #define CODESIZE_MIN 20U
     #define CODESIZE_MAX CODESIZE
@@ -207,7 +207,7 @@
     #define REPLACE_FAR(t, fn, fn_stub)\
         *fn = 0x49;\
         *(fn + 1) = 0xbb;\
-        *(long long *)(fn + 2) = (long long)fn_stub;\
+        memcpy((int *)(fn + 2), &fn_stub, sizeof(long long));\
         *(fn + 10) = 0x41;\
         *(fn + 11) = 0xff;\
         *(fn + 12) = 0xe3;\
@@ -216,7 +216,8 @@
     //5 byte(jmp rel32)
     #define REPLACE_NEAR(t, fn, fn_stub)\
         *fn = 0xE9;\
-        *(int *)(fn + 1) = (int)(fn_stub - fn - CODESIZE_MIN);\
+        const int addr = fn_stub - fn - CODESIZE_MIN;\
+        memcpy((int *)(fn + 1), &addr, sizeof(int));\
         CACHEFLUSH((char *)fn, CODESIZE);
 #endif
 
