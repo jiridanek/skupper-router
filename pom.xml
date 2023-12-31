@@ -104,6 +104,7 @@
                       <exclude>tools/scraper/test_data/**</exclude>
                       <exclude>**/doctest.h</exclude>
                       <exclude>**/cpp-stub/*</exclude>
+                      <exclude>**/cpp-stub/elfio/*</exclude>
                       <exclude>**/*_pb2*</exclude>
                       <exclude>share/index.html</exclude>
                       <exclude>scripts/git-clang-format</exclude>
