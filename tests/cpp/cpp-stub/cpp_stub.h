@@ -273,19 +273,19 @@ public:
                     std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
                 }
 
-                CACHEFLUSH(pstub->fn, CODESIZE);
+                CACHEFLUSH((char *)pstub->fn, CODESIZE);
 
 #ifdef _WIN32
                 VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect);
 #else
                 mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC);
-#endif     
+#endif
             }
 
             iter->second  = NULL;
-            delete pstub;        
+            delete pstub;
         }
-        
+
         return;
     }
     template<typename T,typename S>
@@ -298,7 +298,7 @@ public:
         struct func_stub *pstub;
         pstub = new func_stub;
         //start
-        reset(fn); // 
+        reset(fn); //
         pstub->fn = fn;
 
         if(distanceof(fn, fn_stub))
@@ -317,7 +317,7 @@ public:
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif       
+#endif
         {
             throw("stub set memory protect to w+r+x faild");
         }
@@ -335,7 +335,7 @@ public:
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READ, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_EXEC))
-#endif     
+#endif
         {
             throw("stub set memory protect to r+x failed");
         }
@@ -348,22 +348,22 @@ public:
     {
         unsigned char * fn;
         fn = addrof(addr);
-        
+
         std::map<unsigned char*,func_stub*>::iterator iter = m_result.find(fn);
-        
+
         if (iter == m_result.end())
         {
             return;
         }
         struct func_stub *pstub;
         pstub = iter->second;
-        
+
 #ifdef _WIN32
         DWORD lpflOldProtect;
         if(0 == VirtualProtect(pageof(pstub->fn), m_pagesize * 2, PAGE_EXECUTE_READWRITE, &lpflOldProtect))
 #else
         if (-1 == mprotect(pageof(pstub->fn), m_pagesize * 2, PROT_READ | PROT_WRITE | PROT_EXEC))
-#endif       
+#endif
         {
             throw("stub reset memory protect to w+r+x faild");
         }
@@ -377,7 +377,7 @@ public:
             std::memcpy(pstub->fn, pstub->code_buf, CODESIZE_MIN);
         }
 
-        CACHEFLUSH(pstub->fn, CODESIZE);
+        CACHEFLUSH((char *)pstub->fn, CODESIZE);
 
 
 #ifdef _WIN32
