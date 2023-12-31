@@ -1,6 +1,8 @@
 #ifndef __STUB_H__
 #define __STUB_H__
 
+#include "qd_asan_interface.h"
+
 #ifdef _WIN32 
 //windows
 #include <windows.h>
@@ -291,6 +293,7 @@ public:
         return;
     }
     template<typename T,typename S>
+    ATTRIBUTE_NO_SANITIZE_THREAD
     void set(T addr, S addr_stub)
     {
         unsigned char * fn;
