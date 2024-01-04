@@ -44,7 +44,7 @@ if [[ "${CROSSCOMPILING}" == true ]]; then
 else
   ENABLE_PROFILE_GUIDED_OPTIMIZATION=ON
 
-  BUILD_FLAGS="$(rpmbuild --undefine _annotated_build --eval '%set_build_flags')"
+  BUILD_FLAGS="$(rpmbuild --eval '%set_build_flags')"
   eval "${BUILD_FLAGS}"
 fi
 
