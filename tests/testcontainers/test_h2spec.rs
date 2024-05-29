@@ -28,7 +28,7 @@ use futures::StreamExt;
 use futures::{FutureExt, pin_mut, select, stream_select};
 
 use crate::collection;
-use crate::testcontainers::docker::{create_and_start_container, find_or_pull_image, get_container_exit_code, get_container_hostname, H2SPEC_IMAGE, NETCAT_IMAGE, NGHTTP2_IMAGE, recreate_network, stream_container_logs, wait_for_port_using_nc};
+use crate::testcontainers::docker::{create_and_start_container, find_or_pull_image, get_container_exit_code, get_container_hostname, H2SPEC_IMAGE, FEDORA_IMAGE, recreate_network, stream_container_logs, wait_for_port_using_nc};
 
 const ROUTER_CONFIG: &str = r#"
 router {
@@ -113,18 +113,18 @@ async fn test_h2spec() {
 
     // prefetch all images before creating containers
 
-    find_or_pull_image(&docker, NGHTTP2_IMAGE).await;
+    find_or_pull_image(&docker, FEDORA_IMAGE).await;
     find_or_pull_image(&docker, skupper_router_image).await;
-    find_or_pull_image(&docker, NETCAT_IMAGE).await;
     find_or_pull_image(&docker, H2SPEC_IMAGE).await;
 
     // create container_nghttpd
 
     let container_nghttpd = create_and_start_container(
-        &docker, NGHTTP2_IMAGE, "nghttpd",
+        &docker, FEDORA_IMAGE, "nghttpd",
         Config {
             host_config: Some(hostconfig.clone()),
-            cmd: Some(vec!["nghttpd", "-a", "0.0.0.0", "--no-tls", "-d", "/tmp", "8888"]),
+            cmd: Some(vec!["bash".to_string(), "-c".to_string(),
+                           format!("{};{}", "microdnf install -y nghttp2", "nghttpd -a 0.0.0.0 --no-tls -d /tmp 8888")]),
             ..Default::default()
         }).await;
     let logs_nghttpd = stream_container_logs(&docker, "nghttpd", &container_nghttpd);
@@ -136,7 +136,7 @@ async fn test_h2spec() {
         Config {
             host_config: Some(hostconfig.clone()),
             env: Some(vec![
-                format!("QDROUTERD_CONF={}", ROUTER_CONFIG).as_str(),
+                format!("QDROUTERD_CONF={}", ROUTER_CONFIG).as_str().parse().unwrap(),
             ]),
             ..Default::default()
         }).await;
@@ -148,9 +148,9 @@ async fn test_h2spec() {
 
     // container_h2spec
 
-    let h2args: Vec<&str> = [
-        vec!["-h", &hostname, "-p", "24162", "--verbose", "--insecure", "--timeout", "10"],
-        enabled_h2spec_tests.iter().map(String::as_str).collect()
+    let h2args: Vec<String> = [
+        ["-h", &hostname, "-p", "24162", "--verbose", "--insecure", "--timeout", "10"].map(String::from).to_vec(),
+        enabled_h2spec_tests
     ].concat();
     let container_h2spec = create_and_start_container(
         &docker, H2SPEC_IMAGE, "h2spec",

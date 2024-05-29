@@ -39,8 +39,7 @@ const DRAIN_LOGS_TIMEOUT: Duration = Duration::from_secs(5);
 // https://hub.docker.com/r/summerwind/h2spec
 pub(crate) const H2SPEC_IMAGE: &str = "docker.io/summerwind/h2spec:2.6.0";  // do not prefix with `docker.io/` for docker; podman does not mind
 // https://nixery.dev/
-pub(crate) const NGHTTP2_IMAGE: &str = "nixery.dev/nghttp2:latest";
-pub(crate) const NETCAT_IMAGE: &str = "nixery.dev/netcat:latest";
+pub(crate) const FEDORA_IMAGE: &str = "quay.io/fedora/fedora-minimal:latest";
 
 pub(crate) struct LogPrinter {
     tasks: Vec<JoinHandle<()>>,
@@ -113,10 +112,11 @@ pub(crate) async fn wait_for_port_using_nc(docker: &Docker, hostconfig: HostConf
         .with_max_retries(10);
 
     let container_netcat = create_and_start_container(
-        &docker, NETCAT_IMAGE, "test_h2spec_netcat",
+        &docker, FEDORA_IMAGE, "test_h2spec_netcat",
         Config {
             host_config: Some(hostconfig),
-            cmd: Some(vec!["nc", "-zv", hostname, port]),
+            cmd: Some(vec!["bash".to_string(), "-c".to_string(),
+                           format!("{};{}", "microdnf install -y nmap-ncat", format!("nc -zv {} {}", hostname, port))]),
             ..Default::default()
         }).await;
 
@@ -171,15 +171,15 @@ pub(crate) async fn docker_pull(docker: &Docker, image: &str) -> Vec<CreateImage
     }), None, None).try_collect::<Vec<_>>().await.unwrap()
 }
 
-pub(crate) async fn create_and_start_container(docker: &Docker, image: &str, name: &str, config: Config<&str>) -> ContainerCreateResponse {
+pub(crate) async fn create_and_start_container(docker: &Docker, image: &str, name: &str, config: Config<String>) -> ContainerCreateResponse {
     let image_id = find_or_pull_image(docker, image).await;
     // to be extra sure container does not already exist
     delete_container(&docker, name).await;
 
     let container: ContainerCreateResponse = docker.create_container(
         Some(CreateContainerOptions { name, platform: Some("linux/amd64") }),
-        Config::<&str> {
-            image: Some(&*image_id),
+        Config {
+            image: Some(image_id),
             ..config
         }).await.unwrap();
     docker.start_container(&*container.id, None::<StartContainerOptions<String>>).await.unwrap();

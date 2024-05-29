@@ -28,8 +28,8 @@ use speculoos::assert_that;
 use speculoos::prelude::StrAssertions;
 
 use crate::collection;
-use crate::testcontainers::docker::LogPrinter;
-use crate::testcontainers::docker::{create_and_start_container, docker_exec, docker_read_output, find_or_pull_image, get_container_exposed_ports, get_container_gateway, NETCAT_IMAGE, stream_container_logs, wait_for_port_using_nc};
+use crate::testcontainers::docker::{FEDORA_IMAGE, LogPrinter};
+use crate::testcontainers::docker::{create_and_start_container, docker_exec, docker_read_output, find_or_pull_image, get_container_exposed_ports, get_container_gateway, stream_container_logs, wait_for_port_using_nc};
 
 /**
  * Starts skrouterd and queries it with skmanage from inside the same container.
@@ -53,7 +53,7 @@ async fn test_skrouterd_sanity() -> Result<(), Box<dyn std::error::Error>> {
 
     // prefetch all images before creating containers
     find_or_pull_image(&docker, skupper_router_image).await;
-    find_or_pull_image(&docker, NETCAT_IMAGE).await;
+    find_or_pull_image(&docker, FEDORA_IMAGE).await;
 
     let skrouterd = create_and_start_container(
         &docker, skupper_router_image, "skrouterd_sanity",
